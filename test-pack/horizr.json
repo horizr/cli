@@ -1,0 +1,15 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "name": "Test",
+    "version": "1.0.0",
+    "authors": ["John Doe"],
+    "description":  "A test pack for testing the horizr CLI. It is not intended for playing.",
+    "license": "MIT"
+  },
+  "loader": "fabric",
+  "versions": {
+    "loader": "0.14.7",
+    "minecraft": "1.18.2"
+  }
+}

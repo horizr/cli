@@ -1,0 +1,56 @@
+{
+  "name": "horizr-cli",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/main.ts",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx .",
+    "build": "tsc"
+  },
+  "oclif": {
+    "bin": "horizr",
+    "dirname": "horizr",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " "
+  },
+  "bin": {
+    "horizr": "./bin/horizr"
+  },
+  "dependencies": {
+    "commander": "^9.4.0",
+    "dedent": "^0.7.0",
+    "env-paths": "^3.0.0",
+    "figures": "^5.0.0",
+    "find-up": "^6.3.0",
+    "fs-extra": "^10.1.0",
+    "got": "^12.3.1",
+    "hasha": "^5.2.2",
+    "keyv-file": "^0.2.0",
+    "kleur": "^4.1.5",
+    "lodash-es": "^4.17.21",
+    "loud-rejection": "^2.2.0",
+    "nanoid": "^4.0.0",
+    "ora": "^6.1.2",
+    "p-limit": "^4.0.0",
+    "s-ago": "^2.2.0",
+    "semver": "^7.3.7",
+    "wrap-ansi": "^8.0.1",
+    "zod": "^3.18.0"
+  },
+  "devDependencies": {
+    "@types/dedent": "^0.7.0",
+    "@types/fs-extra": "^9.0.13",
+    "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.7.3",
+    "@types/semver": "^7.3.12",
+    "@types/wrap-ansi": "^8.0.1",
+    "tsx": "^3.8.2",
+    "type-fest": "^2.18.0",
+    "typescript": "^4.7.4"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Charm",
+  "enabled": true,
+  "ignoreUpdates": true,
+  "side": "client+server",
+  "file": {
+    "version": "4.2.0+1.18.2",
+    "name": "charm-fabric-1.18.2-4.2.0.jar",
+    "size": 3413876,
+    "downloadUrl": "https://cdn.modrinth.com/data/pOQTcQmj/versions/4.2.0+1.18.2/charm-fabric-1.18.2-4.2.0.jar",
+    "hashAlgorithm": "sha512",
+    "hash": "3c8cd08ab1e37dcbf0f5a956cd20d84c98e58ab49fdc13faafb9c2af4dbf7fba7c8328cb5365997fe4414cfc5cb554ed13b3056a22df1c6bd335594f380facb6"
+  },
+  "source": {
+    "type": "modrinth",
+    "modId": "pOQTcQmj",
+    "versionId": "BT9G1Jjs"
+  }
+}
