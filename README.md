@@ -1,3 +1,5 @@
+![horizr](https://github.com/horizr/art/raw/main/horizr-banner.jpg)
+
 # horizr CLI
 ![npm](https://img.shields.io/npm/v/@horizr/cli?color=white&label=latest%20version&logoColor=red&style=flat-square)
 
@@ -80,6 +82,7 @@ Available updates
 - charm Charm: 4.1.0+1.18.2 → 4.2.0+1.18.2
 ```
 
+- Apply an update
 ```sh
 $ horizr update charm
 
@@ -94,3 +97,10 @@ Apply the update? [Y/n] y
 
 Successfully updated Charm to 4.2.0+1.18.2.
 ```
+
+## Contributing
+
+I developed this tool primarily for my own packs, soooo… the code quality is not bad, but it’s not good either.
+
+If you want a feature added, feel free to [create an issue](https://github.com/horizr/cli/issues/new).
+A pull request would be even better.
