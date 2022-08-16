@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@types/cross-zip': ^4.0.0
   '@types/dedent': ^0.7.0
   '@types/fs-extra': ^9.0.13
   '@types/lodash-es': ^4.17.6
@@ -8,6 +9,7 @@ specifiers:
   '@types/semver': ^7.3.12
   '@types/wrap-ansi': ^8.0.1
   commander: ^9.4.0
+  cross-zip: ^4.0.0
   dedent: ^0.7.0
   env-paths: ^3.0.0
   figures: ^5.0.0
@@ -32,6 +34,7 @@ specifiers:
 
 dependencies:
   commander: 9.4.0
+  cross-zip: 4.0.0
   dedent: 0.7.0
   env-paths: 3.0.0
   figures: 5.0.0
@@ -52,6 +55,7 @@ dependencies:
   zod: 3.18.0
 
 devDependencies:
+  '@types/cross-zip': 4.0.0
   '@types/dedent': 0.7.0
   '@types/fs-extra': 9.0.13
   '@types/lodash-es': 4.17.6
@@ -114,6 +118,10 @@ packages:
       '@types/node': 18.7.3
       '@types/responselike': 1.0.0
     dev: false
+
+  /@types/cross-zip/4.0.0:
+    resolution: {integrity: sha512-jZRaaM3aib7qgVhCWeo76vVNJW+8+ujJzP/JHPPA4WUp5YBNMsqiyu5uYWg2eS05+jgSfb5NN8eqrAG72Ab2kA==}
+    dev: true
 
   /@types/dedent/0.7.0:
     resolution: {integrity: sha512-EGlKlgMhnLt/cM4DbUSafFdrkeJoC9Mvnj0PUCU7tFmTjMjNRT957kXCx0wYm3JuEq4o4ZsS5vG+NlkM2DMd2A==}
@@ -261,6 +269,11 @@ packages:
     dependencies:
       '@types/json-buffer': 3.0.0
       json-buffer: 3.0.1
+    dev: false
+
+  /cross-zip/4.0.0:
+    resolution: {integrity: sha512-MEzGfZo0rqE10O/B+AEcCSJLZsrWuRUvmqJTqHNqBtALhaJc3E3ixLGLJNTRzEA2K34wbmOHC4fwYs9sVsdcCA==}
+    engines: {node: '>=12.10'}
     dev: false
 
   /currently-unhandled/0.4.1:

@@ -9,7 +9,7 @@ import { default as wrapAnsi } from "wrap-ansi"
 import { removeModFile } from "./files.js"
 import { output } from "./output.js"
 import figures from "figures"
-import { releaseChannelOrder } from "./modrinth.js"
+import { releaseChannelOrder } from "./shared.js"
 
 const program = new Command("horizr")
 
@@ -39,7 +39,7 @@ program.command("remove <code>")
     const pack = await usePack()
     const mod = pack.findModByCodeOrFail(code)
 
-    await removeModFile(pack.path, mod.id)
+    await removeModFile(pack.rootDirectoryPath, mod.id)
 
     output.println(`${mod.modFile.name} ${kleur.green("was removed from the pack.")}`)
   })

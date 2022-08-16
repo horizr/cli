@@ -2,23 +2,21 @@ import { Command } from "commander"
 import { take } from "lodash-es"
 import { usePack } from "../pack.js"
 import kleur from "kleur"
-import { optionParsePositiveInteger, truncateWithEllipsis } from "../utils.js"
+import { optionParsePositiveInteger, truncateWithEllipsis, zip } from "../utils.js"
 import { default as wrapAnsi } from "wrap-ansi"
 import figures from "figures"
 import {
-  addModrinthMod,
-  findModForModrinthMod,
-  getModFileDataForModrinthVersion, isModrinthVersionCompatible,
   modrinthApi,
   ModrinthMod,
   ModrinthVersion,
   ModrinthVersionRelation,
-  sortModrinthVersionsByPreference
-} from "../modrinth.js"
+} from "../modrinth/api.js"
 import dedent from "dedent"
 import ago from "s-ago"
 import semver from "semver"
 import { output } from "../output.js"
+import fs from "fs-extra"
+import { addModrinthMod, findModForModrinthMod, getModFileDataForModrinthVersion, isModrinthVersionCompatible, sortModrinthVersionsByPreference } from "../modrinth/utils.js"
 
 const modrinthCommand = new Command("modrinth")
   .alias("mr")
@@ -268,10 +266,60 @@ modrinthVersionCommand.command("activate <id>")
     await handleActivate(modrinthMod, modrinthVersion, options.force)
   })
 
-modrinthVersionCommand.command("export")
-  .description("Generate a Modrinth pack file suitable for uploading")
-  .action(async () => {
-    // TODO: Implement export
+modrinthCommand.command("export")
+  .description("Generate a Modrinth pack file suitable for uploading.")
+  .option("-z, --no-zip", "Skip the creation of a zipped .mrpack file.")
+  .option("-c, --clear", "Remove the output directory afterwards.")
+  .action(async options => {
+    const pack = await usePack()
+    const loader = output.startLoading("Generating")
+
+    const outputDirectory = pack.rootDirectoryPath.resolve("modrinth-pack")
+    await fs.remove(outputDirectory.toString())
+    await fs.mkdirp(outputDirectory.toString())
+
+    await fs.writeJson(outputDirectory.resolve("modrinth.index.json").toString(), {
+      formatVersion: 1,
+      game: "minecraft",
+      versionId: pack.horizrFile.meta.version,
+      name: pack.horizrFile.meta.name,
+      summary: pack.horizrFile.meta.description,
+      dependencies: {
+        minecraft: pack.horizrFile.versions.minecraft,
+        [`${pack.horizrFile.loader}-loader`]: pack.horizrFile.versions.loader
+      },
+      files: pack.mods.map(mod => ({
+        path: `mods/${mod.modFile.file.name}`,
+        hashes: {
+          sha1: mod.modFile.file.hashes.sha1,
+          sha512: mod.modFile.file.hashes.sha512
+        },
+        env: {
+          client: mod.modFile.side === "client" || mod.modFile.side === "client+server" ? "required" : "unsupported",
+          server: mod.modFile.side === "server" || mod.modFile.side === "client+server" ? "required" : "unsupported"
+        },
+        downloads: [
+          mod.modFile.file.downloadUrl
+        ],
+        fileSize: mod.modFile.file.size
+      }))
+    })
+
+    if (!options.clear) output.println(kleur.green(`Generated Modrinth pack in ${kleur.yellow("modrinth-pack")}`))
+
+    if (options.zip) {
+      loader.setText(`Creating ${kleur.yellow(".mrpack")} file`)
+      await zip(outputDirectory.toString(), pack.rootDirectoryPath.resolve("pack.mrpack").toString())
+      output.println(kleur.green(`Created ${kleur.yellow("pack.mrpack")}`))
+    }
+
+    if (options.clear) {
+      loader.setText("Removing the output directory")
+      await fs.remove(outputDirectory.toString())
+      output.println(kleur.green(`Removed the ${kleur.yellow("modrinth-pack")} directory`))
+    }
+
+    loader.stop()
   })
 
 async function handleActivate(modrinthMod: ModrinthMod, modrinthVersion: ModrinthVersion, force: boolean) {

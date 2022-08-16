@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "commander": "^9.4.0",
+    "cross-zip": "^4.0.0",
     "dedent": "^0.7.0",
     "env-paths": "^3.0.0",
     "figures": "^5.0.0",
@@ -43,6 +44,7 @@
     "zod": "^3.18.0"
   },
   "devDependencies": {
+    "@types/cross-zip": "^4.0.0",
     "@types/dedent": "^0.7.0",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash-es": "^4.17.6",

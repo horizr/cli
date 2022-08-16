@@ -3,7 +3,6 @@ import { usePack } from "../pack.js"
 import fs from "fs-extra"
 import dedent from "dedent"
 import kleur from "kleur"
-import { relative } from "path"
 import { getSha512HexHash } from "../utils.js"
 import { output } from "../output.js"
 
@@ -25,9 +24,10 @@ packwizCommand.command("export")
 
     const loader = output.startLoading("Generating")
 
-    const rootDirectoryPath = pack.resolvePath("packwiz")
-    await fs.remove(rootDirectoryPath)
-    await fs.mkdirp(pack.resolvePath("packwiz/mods"))
+    const outputDirectoryPath = pack.rootDirectoryPath.resolve("packwiz")
+    const modsDirectoryPath = outputDirectoryPath.resolve("mods")
+    await fs.remove(outputDirectoryPath.toString())
+    await fs.mkdirp(modsDirectoryPath.toString())
 
     const indexedFiles: IndexedFile[] = []
     for (const mod of pack.mods) {
@@ -40,16 +40,16 @@ packwizCommand.command("export")
         side = "${mod.modFile.side.replace("client+server", "both")}"
         
         [download]
-        hash-format = "${mod.modFile.file.hashAlgorithm}"
-        hash = ${JSON.stringify(mod.modFile.file.hash)}
+        hash-format = "sha512"
+        hash = ${JSON.stringify(mod.modFile.file.hashes.sha512)}
         url = ${JSON.stringify(mod.modFile.file.downloadUrl)}
       `
 
-      const path = pack.resolvePath("packwiz/mods", mod.id + ".toml")
-      await fs.writeFile(path, content)
+      const path = modsDirectoryPath.resolve(mod.id + ".toml")
+      await fs.writeFile(path.toString(), content)
 
       indexedFiles.push({
-        path: relative(rootDirectoryPath, path),
+        path: outputDirectoryPath.relative(path).toString(),
         isMeta: true,
         sha512HashHex: await getSha512HexHash(content)
       })
@@ -68,10 +68,10 @@ packwizCommand.command("export")
       `).join("\n\n")}
     `
 
-    await fs.writeFile(pack.resolvePath("packwiz/index.toml"), index)
+    await fs.writeFile(outputDirectoryPath.resolve("index.toml").toString(), index)
     const indexHash = await getSha512HexHash(index)
 
-    await fs.writeFile(pack.resolvePath("packwiz/pack.toml"), dedent`
+    await fs.writeFile(outputDirectoryPath.resolve("pack.toml").toString(), dedent`
       name = ${JSON.stringify(pack.horizrFile.meta.name)}
       authors = ${JSON.stringify(pack.horizrFile.meta.authors.join(", "))}\
       ${pack.horizrFile.meta.description === undefined ? "" : "\n" + `description = ${JSON.stringify(pack.horizrFile.meta.description)}`}

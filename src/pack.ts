@@ -1,12 +1,12 @@
 import { findPackDirectoryPath, HorizrFile, ModFile, ModFileModrinthSource, readHorizrFile, readModFile, readModIds, writeModFile } from "./files.js"
-import { resolve } from "path"
 import { output } from "./output.js"
 import pLimit from "p-limit"
 import kleur from "kleur"
-import { getModFileDataForModrinthVersion, modrinthApi, ReleaseChannel, sortModrinthVersionsByPreference } from "./modrinth.js"
+import { modrinthApi } from "./modrinth/api.js"
 import semver from "semver"
-
-export type Loader = "fabric" | "quilt"
+import { Path } from "./path.js"
+import { ReleaseChannel } from "./shared.js"
+import { getModFileDataForModrinthVersion, sortModrinthVersionsByPreference } from "./modrinth/utils.js"
 
 export interface Update {
   mod: Mod
@@ -16,19 +16,15 @@ export interface Update {
 }
 
 export interface Pack {
-  path: string
+  rootDirectoryPath: Path
   horizrFile: HorizrFile
   mods: Mod[]
 
   addMod(id: string, file: ModFile): Promise<void>
-
   findModByCode(code: string): Mod | null
-
   findModByCodeOrFail(code: string): Mod
 
   checkForUpdates(allowedReleaseChannels: ReleaseChannel[]): Promise<Update[]>
-
-  resolvePath(...segments: string[]): string
 }
 
 export interface Mod {
@@ -44,17 +40,17 @@ let pack: Pack
 
 export async function usePack(): Promise<Pack> {
   if (pack === undefined) {
-    const path = await findPackDirectoryPath()
+    const rootDirectoryPath = await findPackDirectoryPath()
 
     pack = {
-      path,
-      horizrFile: await readHorizrFile(path),
-      mods: await Promise.all((await readModIds(path)).map(async id => {
+      rootDirectoryPath,
+      horizrFile: await readHorizrFile(rootDirectoryPath),
+      mods: await Promise.all((await readModIds(rootDirectoryPath)).map(async id => {
         const mod: Mod = {
           id,
-          modFile: (await readModFile(path, id))!,
+          modFile: (await readModFile(rootDirectoryPath, id))!,
           async saveModFile() {
-            await writeModFile(path, id, this.modFile)
+            await writeModFile(rootDirectoryPath, id, this.modFile)
           },
           async checkForUpdate(allowedReleaseChannels: ReleaseChannel[]): Promise<Update | null> {
             if (mod.modFile.ignoreUpdates) return null
@@ -106,7 +102,7 @@ export async function usePack(): Promise<Pack> {
         return mod
       })),
       async addMod(id: string, file: ModFile) {
-        await writeModFile(path, id, file)
+        await writeModFile(rootDirectoryPath, id, file)
       },
       findModByCode(code: string): Mod | null {
         if (code.startsWith("mrv:")) {
@@ -138,9 +134,6 @@ export async function usePack(): Promise<Pack> {
 
         loader.stop()
         return updates.filter(info => info !== null) as Update[]
-      },
-      resolvePath(...segments): string {
-        return resolve(path, ...segments)
       }
     }
   }

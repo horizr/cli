@@ -1,8 +1,9 @@
-import envPaths from "env-paths"
 import { InvalidArgumentError } from "commander"
 import hash, { HashaInput } from "hasha"
+import { zip as zipWithCallback } from "cross-zip"
+import { promisify } from "util"
 
-export const paths = envPaths("horizr", { suffix: "" })
+export const zip = promisify(zipWithCallback)
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
