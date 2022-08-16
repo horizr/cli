@@ -5,6 +5,8 @@ import dedent from "dedent"
 import kleur from "kleur"
 import { getSha512HexHash } from "../utils.js"
 import { output } from "../output.js"
+import { Visitor, walk } from "@root/walk"
+import { Path } from "../path.js"
 
 const packwizCommand = new Command("packwiz")
 
@@ -17,12 +19,28 @@ interface IndexedFile {
 packwizCommand.command("import")
   .description("Import a packwiz pack.")
   .action(async () => {
+    output.failAndExit("Not implemented.")
     // TODO: Import packwiz pack
+  })
+
+packwizCommand.command("serve")
+  .description("Start an HTTP server in the packwiz directory.")
+  .action(async () => {
+    output.failAndExit("Not implemented.")
+    // TODO: serve
+  })
+
+packwizCommand.command("dev")
+  .description("serve + export with hot-reloading.")
+  .action(async () => {
+    output.failAndExit("Not implemented.")
+    // TODO: serve and export with hot-reloading
   })
 
 packwizCommand.command("export")
   .description("Generate a packwiz pack in the packwiz directory.")
-  .action(async () => {
+  .option("-s, --server", "Use server overrides instead of client overrides.")
+  .action(async options => {
     const pack = await usePack()
 
     if (pack.horizrFile.loader !== "fabric")
@@ -62,6 +80,38 @@ packwizCommand.command("export")
 
       innerLoader.stop()
     }
+
+    loader.setText(`Copying and hashing ${options.server ? "server" : "client"} overrides`)
+
+    const createVisitor = (overridesDirectoryPath: Path): Visitor => async (error, path, dirent) => {
+      const relativePath = overridesDirectoryPath.relative(Path.create(path))
+
+      if (error) output.warn(`${kleur.yellow(relativePath.toString())}: ${error.message}`)
+      else {
+        if (dirent.name.startsWith(".")) return false
+        if (dirent.isFile()) {
+          const outputPath = outputDirectoryPath.resolve(relativePath)
+          await fs.mkdirp(outputPath.getParent().toString())
+          console.log(path)
+          console.log(outputPath.toString())
+          await fs.copy(path, outputPath.toString())
+
+          indexedFiles.push({
+            path: relativePath.toString(),
+            isMeta: false,
+            sha512HashHex: await getSha512HexHash(await fs.readFile(overridesDirectoryPath.resolve(path).toString()))
+          })
+        }
+      }
+    }
+
+    const specificOverridesDirectoryPath = pack.paths.overrides[options.server ? "server" : "client"]
+    const universalOverridesDirectoryPath = pack.paths.overrides["client-server"]
+
+    if (await fs.pathExists(specificOverridesDirectoryPath.toString())) await walk(specificOverridesDirectoryPath.toString(), createVisitor(specificOverridesDirectoryPath))
+    if (await fs.pathExists(universalOverridesDirectoryPath.toString())) await walk(universalOverridesDirectoryPath.toString(), createVisitor(universalOverridesDirectoryPath))
+
+    loader.setText(`Writing ${kleur.yellow("index.toml")}`)
 
     const index = dedent`
       hash-format = "sha512"
