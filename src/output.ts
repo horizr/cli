@@ -64,8 +64,8 @@ export const output = {
       text,
       spinner: ora({
         spinner: "dots4",
-        color: "blue",
-        prefixText: "\n"
+        // prefixText: "\n"
+        color: "blue"
       }),
       fail(message?: string) {
         if (this.state !== "running") throw new Error("state is not 'running'")
@@ -147,6 +147,7 @@ export const output = {
   },
   warn(text: string) {
     this.printlnWrapping(`${kleur.yellow(figures.pointer)} ${text}`)
+    this.println("")
   },
   fail(text: string) {
     last(loadersStack)?.fail()

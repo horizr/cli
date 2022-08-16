@@ -12,12 +12,14 @@ export interface Update {
   mod: Mod
   activeVersion: string
   availableVersion: string
+  changelog: string | null
   apply(): Promise<void>
 }
 
 export interface Pack {
   paths: {
     root: Path,
+    mods: Path,
     generated: Path,
     overrides: Record<Side, Path>
   },
@@ -52,6 +54,7 @@ export async function usePack(): Promise<Pack> {
       paths: {
         root: rootDirectoryPath,
         generated: rootDirectoryPath.resolve("generated"),
+        mods: rootDirectoryPath.resolve("mods"),
         overrides: {
           client: overridesDirectoryPath.resolve("client"),
           server: overridesDirectoryPath.resolve("server"),
@@ -96,6 +99,7 @@ export async function usePack(): Promise<Pack> {
                 mod,
                 activeVersion: activeVersionString,
                 availableVersion: newestVersion.versionString,
+                changelog: newestVersion.changelog,
                 async apply() {
                   const modrinthMod = (await modrinthApi.getMod(newestVersion.projectId))!
 

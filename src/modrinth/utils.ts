@@ -50,7 +50,7 @@ export async function addModrinthMod(modrinthMod: ModrinthMod, modrinthVersion: 
   const pack = await usePack()
   let id = modrinthMod.slug
 
-  if (await pathExists(pack.rootDirectoryPath.resolve("mods", `${id}.json`).toString())) {
+  if (await pathExists(pack.paths.mods.resolve(`${id}.json`).toString())) {
     const oldId = id
     id = `${id}-${nanoid(5)}`
 
@@ -67,7 +67,7 @@ export async function addModrinthMod(modrinthMod: ModrinthMod, modrinthVersion: 
     name: modrinthMod.title,
     enabled: true,
     ignoreUpdates: false,
-    side: isClientSupported && isServerSupported ? "client+server" : isClientSupported ? "client" : "server",
+    side: isClientSupported && isServerSupported ? "client-server" : isClientSupported ? "client" : "server",
     file: getModFileDataForModrinthVersion(modrinthMod, modrinthVersion),
     source: {
       type: "modrinth",

@@ -191,7 +191,8 @@ const modrinthVersionCommand = modrinthCommand.command("version")
 
 modrinthVersionCommand.command("info <id>")
   .description("Show information about the version.")
-  .action(async id => {
+  .option("-c, --changelog", "Show the changelog.")
+  .action(async (id, options) => {
     const pack = await usePack()
     const loader = output.startLoading("Fetching version information")
 
@@ -244,6 +245,13 @@ modrinthVersionCommand.command("info <id>")
       
       https://modrinth.com/mod/${modrinthMod.slug}/version/${modrinthVersion.versionString}
     `)
+
+    if (options.changelog) {
+      output.println("")
+      output.println(kleur.underline("Changelog"))
+      if (modrinthVersion.changelog === null) output.println(kleur.gray("not available"))
+      else output.printlnWrapping(modrinthVersion.changelog)
+    }
   })
 
 modrinthVersionCommand.command("activate <id>")

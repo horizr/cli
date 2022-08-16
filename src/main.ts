@@ -9,9 +9,16 @@ import { default as wrapAnsi } from "wrap-ansi"
 import { removeModFile } from "./files.js"
 import { output } from "./output.js"
 import figures from "figures"
+import yesno from "yesno"
 import { releaseChannelOrder } from "./shared.js"
+import fs from "fs-extra"
+import { Path } from "./path.js"
 
 const program = new Command("horizr")
+  .version(
+    (await fs.readJson(Path.create(import.meta.url.slice(5)).getParent().resolve("../package.json").toString())).version,
+    "-v, --version"
+  )
 
 program.command("info", { isDefault: true })
   .description("Print information about the pack.")
@@ -65,18 +72,31 @@ program.command("update [code]")
         `)
       }
     } else {
-      const loader = output.startLoading("Checking for an update")
       const mod = pack.findModByCodeOrFail(code)
-      const update = await mod.checkForUpdate(allowedReleaseChannels)
+      const update = await output.withLoading(mod.checkForUpdate(allowedReleaseChannels), "Checking for an update")
 
       if (update === null) {
-        loader.stop()
         output.println(kleur.green("No update available."))
       } else {
-        loader.setText("Updating")
-        await update.apply()
-        loader.stop()
-        output.println(kleur.green(`Successfully updated ${kleur.yellow(update.mod.modFile.name)} to ${kleur.yellow(update.availableVersion)}.`))
+        if (update.changelog === null) {
+          output.println(`No changelog available for ${kleur.bold(update.availableVersion)}.`)
+        } else {
+          output.println(`${kleur.underline("Changelog")} for ${kleur.bold().yellow(update.availableVersion)}\n`)
+          output.printlnWrapping(update.changelog)
+        }
+
+        output.println("")
+
+        const confirmed = options.yes || await yesno({
+          question: "Apply the update? [Y/n]",
+          defaultValue: true,
+          invalid: () => {}
+        })
+
+        if (confirmed) {
+          await output.withLoading(update.apply(), "Updating")
+          output.println(kleur.green(`Successfully updated ${kleur.yellow(update.mod.modFile.name)} to ${kleur.yellow(update.availableVersion)}.`))
+        }
       }
     }
   })
@@ -85,7 +105,7 @@ loudRejection(stack => {
   output.failAndExit(stack)
 })
 
-program
+await program
   .addCommand(packwizCommand)
   .addCommand(modrinthCommand)
   .addHelpText("after", "\n" + dedent`
@@ -95,6 +115,3 @@ program
     - The ID of a Modrinth Version, prefixed with ${kleur.yellow("mrv:")}
   `)
   .parseAsync(process.argv)
-  .catch(error => {
-    output.failAndExit(error.message)
-  })

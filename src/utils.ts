@@ -11,8 +11,27 @@ import addressWithCallback from "address"
 import { promisify } from "util"
 
 const address = promisify(addressWithCallback)
-
 export const getLANAddress = () => address().then(r => r.ip)
+
+export function createSingleConcurrencyWithQueue(fn: () => Promise<void>) {
+  let state: "inactive" | "running_fresh" | "running_old" = "inactive"
+
+  return async () => {
+    if (state === "inactive") {
+      const loop = () => {
+        state = "running_fresh"
+
+        fn().then(() => {
+          if (state === "running_old") loop()
+        })
+      }
+
+      loop()
+    } else {
+      state = "running_old"
+    }
+  }
+}
 
 export function httpServeDirectory(path: Path, port: number, expose: boolean, onListen: () => void) {
   const server = http.createServer((request, response) => {
@@ -46,7 +65,7 @@ export async function zipDirectory(directoryPath: Path, outputFilePath: Path) {
     if (directoryPath.toString() === path) return true
     if (dirent.name.startsWith(".")) return false
 
-    if (dirent.isFile()) zipFile.addFile(path, directoryPath.relative(Path.create(path)).toString(), { compress: true })
+    if (dirent.isFile()) zipFile.addFile(path, directoryPath.relative(path).toString(), { compress: true })
   })
 
   zipFile.end()

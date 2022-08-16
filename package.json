@@ -1,26 +1,22 @@
 {
-  "name": "horizr-cli",
+  "name": "@horizr/cli",
   "version": "1.0.0",
-  "private": true,
-  "main": "./src/main.ts",
+  "main": "./dist/main.ts",
   "type": "module",
   "license": "MIT",
+  "author": "Moritz Ruth <dev@moritzruth.de>",
+  "repository": "https://github.com/horizr/cli",
   "scripts": {
-    "start": "tsx .",
-    "build": "tsc"
-  },
-  "oclif": {
-    "bin": "horizr",
-    "dirname": "horizr",
-    "commands": "./dist/commands",
-    "plugins": [
-      "@oclif/plugin-plugins"
-    ],
-    "topicSeparator": " "
+    "start": "tsx src/main.ts",
+    "build": "del dist && tsc"
   },
   "bin": {
-    "horizr": "./bin/horizr"
+    "horizr": "bin/horizr.js"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "dependencies": {
     "@root/walk": "^1.1.0",
     "address": "^1.2.0",
@@ -45,6 +41,7 @@
     "serve-handler": "^6.1.3",
     "wrap-ansi": "^8.0.1",
     "yazl": "^2.5.1",
+    "yesno": "^0.4.0",
     "zod": "^3.18.0"
   },
   "devDependencies": {
@@ -56,6 +53,7 @@
     "@types/serve-handler": "^6.1.1",
     "@types/wrap-ansi": "^8.0.1",
     "@types/yazl": "^2.4.2",
+    "del-cli": "^5.0.0",
     "tsx": "^3.8.2",
     "type-fest": "^2.18.0",
     "typescript": "^4.7.4"

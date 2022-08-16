@@ -22,8 +22,8 @@ export class Path {
   /**
    * Returns the relative path from this path to the other path.
    */
-  relative(other: Path) {
-    return new Path(pathModule.relative(this.value, other.value))
+  relative(other: Path | string) {
+    return new Path(pathModule.relative(this.value, typeof other === "string" ? other : other.toString()))
   }
 
   getParent() {
