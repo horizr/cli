@@ -14,8 +14,14 @@ interface IndexedFile {
   isMeta: boolean
 }
 
+packwizCommand.command("import")
+  .description("Import a packwiz pack.")
+  .action(async () => {
+    // TODO: Import packwiz pack
+  })
+
 packwizCommand.command("export")
-  .description("Generates a packwiz pack in the packwiz directory")
+  .description("Generate a packwiz pack in the packwiz directory.")
   .action(async () => {
     const pack = await usePack()
 
@@ -24,7 +30,7 @@ packwizCommand.command("export")
 
     const loader = output.startLoading("Generating")
 
-    const outputDirectoryPath = pack.rootDirectoryPath.resolve("packwiz")
+    const outputDirectoryPath = pack.paths.generated.resolve("packwiz")
     const modsDirectoryPath = outputDirectoryPath.resolve("mods")
     await fs.remove(outputDirectoryPath.toString())
     await fs.mkdirp(modsDirectoryPath.toString())
@@ -88,7 +94,7 @@ packwizCommand.command("export")
     `)
 
     loader.stop()
-    output.println(kleur.green("Successfully generated packwiz pack."))
+    output.println(kleur.green("Generated packwiz pack"))
   })
 
 export { packwizCommand}

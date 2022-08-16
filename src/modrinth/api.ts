@@ -1,4 +1,4 @@
-import originalGot, { HTTPError, Response } from "got"
+import got, { HTTPError, Response } from "got"
 import kleur from "kleur"
 import { KeyvFile } from "keyv-file"
 import { delay } from "../utils.js"
@@ -15,8 +15,6 @@ const keyvCache = new KeyvFile({
   decode: JSON.parse
 })
 
-const got = originalGot.extend()
-
 async function getModrinthApiOptional(url: string): Promise<any | null> {
   let response: Response
 
@@ -28,7 +26,30 @@ async function getModrinthApiOptional(url: string): Promise<any | null> {
       },
       cache: keyvCache,
       responseType: "json",
-      throwHttpErrors: false
+      throwHttpErrors: false,
+      retry: {
+        limit: 3,
+        maxRetryAfter: 10,
+        statusCodes: [
+          408,
+          413,
+          // 429,
+          500,
+          502,
+          503,
+          504,
+          521,
+          522,
+          524,
+        ]
+      },
+      hooks: {
+        beforeRetry: [
+          (error, retryCount) => {
+            output.warn(`Request to ${kleur.yellow(error.request!.requestUrl!.toString())} failed, retrying ${kleur.gray(`(${retryCount}/3)`)}`)
+          }
+        ]
+      }
     })
 
     if (response.statusCode.toString().startsWith("2")) {

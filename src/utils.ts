@@ -1,9 +1,26 @@
 import { InvalidArgumentError } from "commander"
 import hash, { HashaInput } from "hasha"
-import { zip as zipWithCallback } from "cross-zip"
-import { promisify } from "util"
+import { Path } from "./path.js"
+import { ZipFile } from "yazl"
+import { walk } from "@root/walk"
+import fs from "fs-extra"
+import { pEvent } from "p-event"
 
-export const zip = promisify(zipWithCallback)
+export async function zipDirectory(directoryPath: Path, outputFilePath: Path) {
+  const zipFile = new ZipFile()
+  zipFile.outputStream.pipe(fs.createWriteStream(outputFilePath.toString()))
+
+  await walk(directoryPath.toString(), async (error, path, dirent) => {
+    if (error) return
+    if (directoryPath.toString() === path) return true
+    if (dirent.name.startsWith(".")) return false
+
+    if (dirent.isFile()) zipFile.addFile(path, directoryPath.relative(Path.create(path)).toString(), { compress: true })
+  })
+
+  zipFile.end()
+  await pEvent(zipFile.outputStream, "close")
+}
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 

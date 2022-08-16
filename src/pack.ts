@@ -1,11 +1,11 @@
-import { findPackDirectoryPath, HorizrFile, ModFile, ModFileModrinthSource, readHorizrFile, readModFile, readModIds, writeModFile } from "./files.js"
+import { findPackDirectoryPath, getOverrideDirents, HorizrFile, ModFile, ModFileModrinthSource, readHorizrFile, readModFile, readModIds, writeModFile } from "./files.js"
 import { output } from "./output.js"
 import pLimit from "p-limit"
 import kleur from "kleur"
 import { modrinthApi } from "./modrinth/api.js"
 import semver from "semver"
 import { Path } from "./path.js"
-import { ReleaseChannel } from "./shared.js"
+import { ReleaseChannel, Side, sides } from "./shared.js"
 import { getModFileDataForModrinthVersion, sortModrinthVersionsByPreference } from "./modrinth/utils.js"
 
 export interface Update {
@@ -16,13 +16,18 @@ export interface Update {
 }
 
 export interface Pack {
-  rootDirectoryPath: Path
+  paths: {
+    root: Path,
+    generated: Path,
+    overrides: Record<Side, Path>
+  },
   horizrFile: HorizrFile
   mods: Mod[]
 
   addMod(id: string, file: ModFile): Promise<void>
   findModByCode(code: string): Mod | null
   findModByCodeOrFail(code: string): Mod
+  validateOverridesDirectories(): Promise<void>
 
   checkForUpdates(allowedReleaseChannels: ReleaseChannel[]): Promise<Update[]>
 }
@@ -41,9 +46,18 @@ let pack: Pack
 export async function usePack(): Promise<Pack> {
   if (pack === undefined) {
     const rootDirectoryPath = await findPackDirectoryPath()
+    const overridesDirectoryPath = rootDirectoryPath.resolve("overrides")
 
     pack = {
-      rootDirectoryPath,
+      paths: {
+        root: rootDirectoryPath,
+        generated: rootDirectoryPath.resolve("generated"),
+        overrides: {
+          client: overridesDirectoryPath.resolve("client"),
+          server: overridesDirectoryPath.resolve("server"),
+          "client-server": overridesDirectoryPath.resolve("client-server")
+        }
+      },
       horizrFile: await readHorizrFile(rootDirectoryPath),
       mods: await Promise.all((await readModIds(rootDirectoryPath)).map(async id => {
         const mod: Mod = {
@@ -119,6 +133,20 @@ export async function usePack(): Promise<Pack> {
         const mod = this.findModByCode(code)
         if (mod === null) return output.failAndExit("The mod could not be found.")
         return mod
+      },
+      async validateOverridesDirectories() {
+        const dirents = await getOverrideDirents(overridesDirectoryPath)
+
+        const notDirectories = dirents.filter(dirent => !dirent.isDirectory())
+        if (notDirectories.length !== 0)
+          output.failAndExit(
+            `The ${kleur.yellow("overrides")} directory contains files that are not directories:\n${notDirectories.slice(0, 5).map(e => `- ${e.name}`).join("\n")}` +
+            (notDirectories.length > 5 ? `\n${kleur.gray(`and ${notDirectories.length - 5} more`)}` : "") +
+            `\n\nAll files must reside in one of these sub-directories: ${sides.map(kleur.yellow).join(", ")}`
+          )
+
+        if (dirents.some(dirent => !(sides as string[]).includes(dirent.name)))
+          output.failAndExit(`The ${kleur.yellow("overrides")} directory may only contain the following sub-directories:\n${sides.map(side => `- ${side}`).join("\n")}`)
       },
       async checkForUpdates(allowedReleaseChannels: ReleaseChannel[]): Promise<Update[]> {
         const limit = pLimit(5)

@@ -22,8 +22,8 @@
     "horizr": "./bin/horizr"
   },
   "dependencies": {
+    "@root/walk": "^1.1.0",
     "commander": "^9.4.0",
-    "cross-zip": "^4.0.0",
     "dedent": "^0.7.0",
     "env-paths": "^3.0.0",
     "figures": "^5.0.0",
@@ -37,20 +37,22 @@
     "loud-rejection": "^2.2.0",
     "nanoid": "^4.0.0",
     "ora": "^6.1.2",
+    "p-event": "^5.0.1",
     "p-limit": "^4.0.0",
     "s-ago": "^2.2.0",
     "semver": "^7.3.7",
     "wrap-ansi": "^8.0.1",
+    "yazl": "^2.5.1",
     "zod": "^3.18.0"
   },
   "devDependencies": {
-    "@types/cross-zip": "^4.0.0",
     "@types/dedent": "^0.7.0",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.7.3",
     "@types/semver": "^7.3.12",
     "@types/wrap-ansi": "^8.0.1",
+    "@types/yazl": "^2.4.2",
     "tsx": "^3.8.2",
     "type-fest": "^2.18.0",
     "typescript": "^4.7.4"

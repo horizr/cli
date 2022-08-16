@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { take } from "lodash-es"
 import { usePack } from "../pack.js"
 import kleur from "kleur"
-import { optionParsePositiveInteger, truncateWithEllipsis, zip } from "../utils.js"
+import { optionParsePositiveInteger, truncateWithEllipsis, zipDirectory } from "../utils.js"
 import { default as wrapAnsi } from "wrap-ansi"
 import figures from "figures"
 import {
@@ -267,59 +267,79 @@ modrinthVersionCommand.command("activate <id>")
   })
 
 modrinthCommand.command("export")
-  .description("Generate a Modrinth pack file suitable for uploading.")
-  .option("-z, --no-zip", "Skip the creation of a zipped .mrpack file.")
+  .description("Export a Modrinth pack.")
+  .option("-s, --no-generate", "Skip regenerating the output directory.")
+  .option("-z, --no-zip", "Skip creating a zipped .mrpack file.")
   .option("-c, --clear", "Remove the output directory afterwards.")
   .action(async options => {
     const pack = await usePack()
-    const loader = output.startLoading("Generating")
 
-    const outputDirectory = pack.rootDirectoryPath.resolve("modrinth-pack")
-    await fs.remove(outputDirectory.toString())
-    await fs.mkdirp(outputDirectory.toString())
+    const outputDirectory = pack.paths.generated.resolve("modrinth-pack")
 
-    await fs.writeJson(outputDirectory.resolve("modrinth.index.json").toString(), {
-      formatVersion: 1,
-      game: "minecraft",
-      versionId: pack.horizrFile.meta.version,
-      name: pack.horizrFile.meta.name,
-      summary: pack.horizrFile.meta.description,
-      dependencies: {
-        minecraft: pack.horizrFile.versions.minecraft,
-        [`${pack.horizrFile.loader}-loader`]: pack.horizrFile.versions.loader
-      },
-      files: pack.mods.map(mod => ({
-        path: `mods/${mod.modFile.file.name}`,
-        hashes: {
-          sha1: mod.modFile.file.hashes.sha1,
-          sha512: mod.modFile.file.hashes.sha512
+    if (options.generate) {
+      const loader = output.startLoading("Generating")
+      await pack.validateOverridesDirectories()
+      await fs.remove(outputDirectory.toString())
+      await fs.mkdirp(outputDirectory.toString())
+
+      await fs.writeJson(outputDirectory.resolve("modrinth.index.json").toString(), {
+        formatVersion: 1,
+        game: "minecraft",
+        versionId: pack.horizrFile.meta.version,
+        name: pack.horizrFile.meta.name,
+        summary: pack.horizrFile.meta.description,
+        dependencies: {
+          minecraft: pack.horizrFile.versions.minecraft,
+          [`${pack.horizrFile.loader}-loader`]: pack.horizrFile.versions.loader
         },
-        env: {
-          client: mod.modFile.side === "client" || mod.modFile.side === "client+server" ? "required" : "unsupported",
-          server: mod.modFile.side === "server" || mod.modFile.side === "client+server" ? "required" : "unsupported"
-        },
-        downloads: [
-          mod.modFile.file.downloadUrl
-        ],
-        fileSize: mod.modFile.file.size
-      }))
-    })
+        files: pack.mods.map(mod => ({
+          path: `mods/${mod.modFile.file.name}`,
+          hashes: {
+            sha1: mod.modFile.file.hashes.sha1,
+            sha512: mod.modFile.file.hashes.sha512
+          },
+          env: {
+            client: mod.modFile.side === "client" || mod.modFile.side === "client-server" ? "required" : "unsupported",
+            server: mod.modFile.side === "server" || mod.modFile.side === "client-server" ? "required" : "unsupported"
+          },
+          downloads: [
+            mod.modFile.file.downloadUrl
+          ],
+          fileSize: mod.modFile.file.size
+        }))
+      }, { spaces: 2 })
 
-    if (!options.clear) output.println(kleur.green(`Generated Modrinth pack in ${kleur.yellow("modrinth-pack")}`))
+      if (await fs.pathExists(pack.paths.overrides["client-server"].toString())) await output.withLoading(
+        fs.copy(pack.paths.overrides["client-server"].toString(), outputDirectory.resolve("overrides").toString(), { recursive: true }),
+        "Copying client-server overrides"
+      )
+
+      if (await fs.pathExists(pack.paths.overrides["client"].toString())) await output.withLoading(
+        fs.copy(pack.paths.overrides["client"].toString(), outputDirectory.resolve("client-overrides").toString(), { recursive: true }),
+        "Copying client overrides"
+      )
+
+      if (await fs.pathExists(pack.paths.overrides["server"].toString())) await output.withLoading(
+        fs.copy(pack.paths.overrides["server"].toString(), outputDirectory.resolve("server-overrides").toString(), { recursive: true }),
+        "Copying server overrides"
+      )
+
+      output.println(kleur.green(`Generated Modrinth pack`))
+      loader.stop()
+    }
 
     if (options.zip) {
-      loader.setText(`Creating ${kleur.yellow(".mrpack")} file`)
-      await zip(outputDirectory.toString(), pack.rootDirectoryPath.resolve("pack.mrpack").toString())
+      if (!(await fs.pathExists(outputDirectory.toString())))
+        output.failAndExit(`The ${kleur.yellow("modrinth-pack")} directory does not exist.\nRun the command without ${kleur.yellow("--no-generate")} to create it.`)
+
+      await output.withLoading(zipDirectory(outputDirectory, pack.paths.generated.resolve("pack.mrpack")), `Creating ${kleur.yellow(".mrpack")} file`)
       output.println(kleur.green(`Created ${kleur.yellow("pack.mrpack")}`))
     }
 
     if (options.clear) {
-      loader.setText("Removing the output directory")
       await fs.remove(outputDirectory.toString())
       output.println(kleur.green(`Removed the ${kleur.yellow("modrinth-pack")} directory`))
     }
-
-    loader.stop()
   })
 
 async function handleActivate(modrinthMod: ModrinthMod, modrinthVersion: ModrinthVersion, force: boolean) {

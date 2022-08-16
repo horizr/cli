@@ -6,6 +6,8 @@ import { dirname } from "path"
 import { findUp } from "find-up"
 import { output } from "./output.js"
 import { Path } from "./path.js"
+import { Dirent } from "fs"
+import { sides } from "./shared.js"
 
 export async function findPackDirectoryPath(): Promise<Path> {
   if (process.argv0.endsWith("/node")) { // run using pnpm
@@ -99,7 +101,7 @@ const modFileSchema = z.object({
   name: z.string(),
   enabled: z.boolean().default(true),
   ignoreUpdates: z.boolean().default(false),
-  side: z.enum(["client", "server", "client+server"]),
+  side: z.enum(sides),
   comment: z.string().optional(),
   file: modFileDataSchema,
   source: z.discriminatedUnion("type", [
@@ -128,4 +130,10 @@ export async function readModIds(packPath: Path) {
   const files = await fs.readdir(modsPath.toString(), { withFileTypes: true })
 
   return files.filter(file => file.isFile() && file.name.endsWith(".json")).map(file => file.name.slice(0, -5))
+}
+
+export async function getOverrideDirents(overridesDirectoryPath: Path): Promise<Dirent[]> {
+  if (!await fs.pathExists(overridesDirectoryPath.toString())) return []
+
+  return await fs.readdir(overridesDirectoryPath.toString(), { withFileTypes: true })
 }

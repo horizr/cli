@@ -1,15 +1,15 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/cross-zip': ^4.0.0
+  '@root/walk': ^1.1.0
   '@types/dedent': ^0.7.0
   '@types/fs-extra': ^9.0.13
   '@types/lodash-es': ^4.17.6
   '@types/node': ^18.7.3
   '@types/semver': ^7.3.12
   '@types/wrap-ansi': ^8.0.1
+  '@types/yazl': ^2.4.2
   commander: ^9.4.0
-  cross-zip: ^4.0.0
   dedent: ^0.7.0
   env-paths: ^3.0.0
   figures: ^5.0.0
@@ -23,6 +23,7 @@ specifiers:
   loud-rejection: ^2.2.0
   nanoid: ^4.0.0
   ora: ^6.1.2
+  p-event: ^5.0.1
   p-limit: ^4.0.0
   s-ago: ^2.2.0
   semver: ^7.3.7
@@ -30,11 +31,12 @@ specifiers:
   type-fest: ^2.18.0
   typescript: ^4.7.4
   wrap-ansi: ^8.0.1
+  yazl: ^2.5.1
   zod: ^3.18.0
 
 dependencies:
+  '@root/walk': 1.1.0
   commander: 9.4.0
-  cross-zip: 4.0.0
   dedent: 0.7.0
   env-paths: 3.0.0
   figures: 5.0.0
@@ -48,20 +50,22 @@ dependencies:
   loud-rejection: 2.2.0
   nanoid: 4.0.0
   ora: 6.1.2
+  p-event: 5.0.1
   p-limit: 4.0.0
   s-ago: 2.2.0
   semver: 7.3.7
   wrap-ansi: 8.0.1
+  yazl: 2.5.1
   zod: 3.18.0
 
 devDependencies:
-  '@types/cross-zip': 4.0.0
   '@types/dedent': 0.7.0
   '@types/fs-extra': 9.0.13
   '@types/lodash-es': 4.17.6
   '@types/node': 18.7.3
   '@types/semver': 7.3.12
   '@types/wrap-ansi': 8.0.1
+  '@types/yazl': 2.4.2
   tsx: 3.8.2
   type-fest: 2.18.0
   typescript: 4.7.4
@@ -98,6 +102,10 @@ packages:
     dev: true
     optional: true
 
+  /@root/walk/1.1.0:
+    resolution: {integrity: sha512-FfXPAta9u2dBuaXhPRawBcijNC9rmKVApmbi6lIZyg36VR/7L02ytxoY5K/14PJlHqiBUoYII73cTlekdKTUOw==}
+    dev: false
+
   /@sindresorhus/is/5.3.0:
     resolution: {integrity: sha512-CX6t4SYQ37lzxicAqsBtxA3OseeoVrh9cSJ5PFYam0GksYlupRfy1A+Q4aYD3zvcfECLc0zO2u+ZnR2UYKvCrw==}
     engines: {node: '>=14.16'}
@@ -118,10 +126,6 @@ packages:
       '@types/node': 18.7.3
       '@types/responselike': 1.0.0
     dev: false
-
-  /@types/cross-zip/4.0.0:
-    resolution: {integrity: sha512-jZRaaM3aib7qgVhCWeo76vVNJW+8+ujJzP/JHPPA4WUp5YBNMsqiyu5uYWg2eS05+jgSfb5NN8eqrAG72Ab2kA==}
-    dev: true
 
   /@types/dedent/0.7.0:
     resolution: {integrity: sha512-EGlKlgMhnLt/cM4DbUSafFdrkeJoC9Mvnj0PUCU7tFmTjMjNRT957kXCx0wYm3JuEq4o4ZsS5vG+NlkM2DMd2A==}
@@ -174,6 +178,12 @@ packages:
     resolution: {integrity: sha512-cjwgM6WWy9YakrQ36Pq0vg5XoNblVEaNq+/pHngKl4GyyDIxTeskPoG+tp4LsRk0lHrA4LaLJqlvYridi7mzlw==}
     dev: true
 
+  /@types/yazl/2.4.2:
+    resolution: {integrity: sha512-T+9JH8O2guEjXNxqmybzQ92mJUh2oCwDDMSSimZSe1P+pceZiFROZLYmcbqkzV5EUwz6VwcKXCO2S2yUpra6XQ==}
+    dependencies:
+      '@types/node': 18.7.3
+    dev: true
+
   /ansi-regex/6.0.1:
     resolution: {integrity: sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA==}
     engines: {node: '>=12'}
@@ -199,6 +209,10 @@ packages:
       buffer: 6.0.3
       inherits: 2.0.4
       readable-stream: 3.6.0
+    dev: false
+
+  /buffer-crc32/0.2.13:
+    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: false
 
   /buffer-from/1.1.2:
@@ -269,11 +283,6 @@ packages:
     dependencies:
       '@types/json-buffer': 3.0.0
       json-buffer: 3.0.1
-    dev: false
-
-  /cross-zip/4.0.0:
-    resolution: {integrity: sha512-MEzGfZo0rqE10O/B+AEcCSJLZsrWuRUvmqJTqHNqBtALhaJc3E3ixLGLJNTRzEA2K34wbmOHC4fwYs9sVsdcCA==}
-    engines: {node: '>=12.10'}
     dev: false
 
   /currently-unhandled/0.4.1:
@@ -825,6 +834,13 @@ packages:
     engines: {node: '>=12.20'}
     dev: false
 
+  /p-event/5.0.1:
+    resolution: {integrity: sha512-dd589iCQ7m1L0bmC5NLlVYfy3TbBEsMUfWx9PyAgPeIcFZ/E2yaTZ4Rz4MiBmmJShviiftHVXOqfnfzJ6kyMrQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      p-timeout: 5.1.0
+    dev: false
+
   /p-limit/4.0.0:
     resolution: {integrity: sha512-5b0R4txpzjPWVw/cXXUResoD4hb6U/x9BH08L7nw+GN1sezDzPdxeRvpc9c433fZhBan/wusjbCsqwqm4EIBIQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -837,6 +853,11 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       p-limit: 4.0.0
+    dev: false
+
+  /p-timeout/5.1.0:
+    resolution: {integrity: sha512-auFDyzzzGZZZdHz3BtET9VEz0SE/uMEAx7uWfGPucfzEwwe/xH0iVeZibQmANYE/hp9T2+UUZT5m+BKyrDp3Ew==}
+    engines: {node: '>=12'}
     dev: false
 
   /path-exists/5.0.0:
@@ -1003,6 +1024,12 @@ packages:
 
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+    dev: false
+
+  /yazl/2.5.1:
+    resolution: {integrity: sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==}
+    dependencies:
+      buffer-crc32: 0.2.13
     dev: false
 
   /yocto-queue/1.0.0:

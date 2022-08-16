@@ -23,6 +23,40 @@ export interface InternalLoader extends Loader {
 }
 
 export const output = {
+  async withLoading<T>(promise: Promise<T>, options: string | {
+    text: string
+    exitOnError?: boolean,
+    getErrorMessage?: (e: Error) => string,
+  }): Promise<T> {
+    const actualOptions = typeof options === "string" ? {
+      text: options,
+      exitOnError: true
+    } : {
+      text: options.text,
+      exitOnError: options.exitOnError ?? true,
+      getErrorMessage: options.getErrorMessage ?? (options.exitOnError !== false ? ((e: Error) => e.message) : undefined)
+    }
+
+    const loader = this.startLoading(actualOptions.text)
+
+    try {
+      const result = await promise
+      loader.stop()
+      return result
+    } catch (e: unknown) {
+      const error = e as Error
+
+      if (actualOptions.exitOnError) {
+        if (actualOptions.getErrorMessage) loader.failAndExit(actualOptions.getErrorMessage(error))
+        else loader.failAndExit()
+      } else {
+        if (actualOptions.getErrorMessage) loader.fail(actualOptions.getErrorMessage(error))
+        else loader.fail()
+      }
+
+      throw e
+    }
+  },
   startLoading(text: string): Loader {
     const loader: InternalLoader = {
       isActive: false,
@@ -30,7 +64,8 @@ export const output = {
       text,
       spinner: ora({
         spinner: "dots4",
-        color: "blue"
+        color: "blue",
+        prefixText: "\n"
       }),
       fail(message?: string) {
         if (this.state !== "running") throw new Error("state is not 'running'")
@@ -45,7 +80,16 @@ export const output = {
         }
       },
       failAndExit(message?: string): never {
-        this.fail(message)
+        if (this.state !== "running") throw new Error("state is not 'running'")
+
+        if (message !== undefined) this.text = this.text + " — " + kleur.red(message)
+
+        if (!this.isActive) {
+          last(loadersStack)?.deactivate()
+        }
+
+        this.spinner.fail(this.text)
+
         process.exit(1)
       },
       setText(text: string) {
@@ -91,7 +135,7 @@ export const output = {
       process.stdout.write(text)
     } else {
       loader.deactivate()
-      process.stdout.write(text + "\n" + "\n")
+      process.stdout.write(text)
       loader.activate()
     }
   },

@@ -9,8 +9,7 @@ export class Path {
    * Returns an absolute path by resolving the last segment against the other segments, this path and the current working directory.
    */
   resolve(...segments: (string | Path)[]) {
-    if (this.isAbsolute()) return this
-    else return new Path(pathModule.resolve(this.value, ...segments.map(s => s.toString())))
+    return new Path(pathModule.resolve(this.value, ...segments.map(s => s.toString())))
   }
 
   /**

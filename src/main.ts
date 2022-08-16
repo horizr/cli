@@ -39,7 +39,7 @@ program.command("remove <code>")
     const pack = await usePack()
     const mod = pack.findModByCodeOrFail(code)
 
-    await removeModFile(pack.rootDirectoryPath, mod.id)
+    await removeModFile(pack.paths.root, mod.id)
 
     output.println(`${mod.modFile.name} ${kleur.green("was removed from the pack.")}`)
   })
@@ -81,15 +81,20 @@ program.command("update [code]")
     }
   })
 
-loudRejection()
+loudRejection(stack => {
+  output.failAndExit(stack)
+})
 
 program
   .addCommand(packwizCommand)
   .addCommand(modrinthCommand)
-  .addHelpText("afterAll", "\n" + dedent`
+  .addHelpText("after", "\n" + dedent`
     ${kleur.blue("code")} can be one of the following:
     - The name of a file in the ${kleur.yellow("mods")} directory, optionally without the ${kleur.yellow(".json")} extension
     - The ID of a Modrinth Project, prefixed with ${kleur.yellow("mr:")}
     - The ID of a Modrinth Version, prefixed with ${kleur.yellow("mrv:")}
   `)
-  .parse(process.argv)
+  .parseAsync(process.argv)
+  .catch(error => {
+    output.failAndExit(error.message)
+  })
