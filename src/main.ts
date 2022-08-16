@@ -9,7 +9,6 @@ import { default as wrapAnsi } from "wrap-ansi"
 import { CURRENT_HORIZR_FILE_FORMAT_VERSION, HorizrFile, removeModFile } from "./files.js"
 import { output } from "./output.js"
 import figures from "figures"
-import yesno from "yesno"
 import { releaseChannelOrder } from "./shared.js"
 import fs from "fs-extra"
 import { Path } from "./path.js"
@@ -168,11 +167,11 @@ program.command("update [code]")
 
         output.println("")
 
-        const confirmed = options.yes || await yesno({
-          question: "Apply the update? [Y/n]",
-          defaultValue: true,
-          invalid: () => {}
-        })
+        const confirmed = options.yes || (await enquirer.prompt({
+          type: "confirm",
+          name: "confirmed",
+          message: "Apply the update?"
+        }) as any).confirmed
 
         if (confirmed) {
           await output.withLoading(update.apply(), "Updating")

@@ -7,7 +7,7 @@ import { nanoid } from "nanoid/non-secure"
 import { output } from "../output.js"
 import kleur from "kleur"
 import { ModrinthMod, ModrinthVersion, ModrinthVersionFile } from "./api.js"
-import { releaseChannelOrder } from "../shared.js"
+import { releaseChannelOrder, Side } from "../shared.js"
 
 export const dependencyToRelatedVersionType: Record<string, IterableElement<ModrinthVersion["relations"]>["type"]> = {
   required: "hard_dependency",
@@ -46,7 +46,7 @@ export function getModFileDataForModrinthVersion(modrinthMod: ModrinthMod, modri
   }
 }
 
-export async function addModrinthMod(modrinthMod: ModrinthMod, modrinthVersion: ModrinthVersion) {
+export async function addModrinthMod(modrinthMod: ModrinthMod, modrinthVersion: ModrinthVersion, side?: Side) {
   const pack = await usePack()
   let id = modrinthMod.slug
 
@@ -60,14 +60,18 @@ export async function addModrinthMod(modrinthMod: ModrinthMod, modrinthVersion: 
     )
   }
 
-  const isClientSupported = modrinthMod.clientSide !== "unsupported"
-  const isServerSupported = modrinthMod.serverSide !== "unsupported"
+  if (side === undefined) {
+    const isClientSupported = modrinthMod.clientSide !== "unsupported"
+    const isServerSupported = modrinthMod.serverSide !== "unsupported"
+
+    side = isClientSupported && isServerSupported ? "client-server" : isClientSupported ? "client" : "server"
+  }
 
   await pack.addMod(id, {
     name: modrinthMod.title,
     enabled: true,
     ignoreUpdates: false,
-    side: isClientSupported && isServerSupported ? "client-server" : isClientSupported ? "client" : "server",
+    side,
     file: getModFileDataForModrinthVersion(modrinthMod, modrinthVersion),
     source: {
       type: "modrinth",

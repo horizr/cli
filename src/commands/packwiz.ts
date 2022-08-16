@@ -7,15 +7,43 @@ import { getLANAddress, getSha512HexHash, httpServeDirectory, optionParsePositiv
 import { output } from "../output.js"
 import { Visitor, walk } from "@root/walk"
 import { Path } from "../path.js"
+import toml from "toml"
+import { addModrinthMod } from "../modrinth/utils.js"
+import { modrinthApi } from "../modrinth/api.js"
 
 const packwizCommand = new Command("packwiz")
   .alias("pw")
 
-packwizCommand.command("import")
-  .description("Import a packwiz pack.")
-  .action(async () => {
-    output.failAndExit("Not implemented.")
-    // TODO: Import packwiz pack
+packwizCommand.command("import <path>")
+  .description("Import the mods of a packwiz pack. Overrides are ignored.")
+  .addHelpText("after", kleur.red("This command should only be used in newly created packs. Otherwise, the behaviour is undefined."))
+  .action(async path => {
+    const packDirectoryPath = Path.create(path)
+    const modsDirectoryPath = packDirectoryPath.resolve("mods")
+    if (!await fs.pathExists(modsDirectoryPath.toString())) output.failAndExit(`The pack does not contain a ${kleur.yellow("mods")} directory.`)
+
+    const modFileNames = (await fs.readdir(modsDirectoryPath.toString(), { withFileTypes: true }))
+      .filter(dirent => dirent.isFile() && dirent.name.endsWith(".toml"))
+      .map(dirent => dirent.name)
+
+    let index = 0
+    for (const modFileName of modFileNames) {
+      const content = toml.parse(await fs.readFile(modsDirectoryPath.resolve(modFileName).toString(), "utf-8"))
+      const modrinthVersionId = content.update?.modrinth?.version
+
+      if (modrinthVersionId === undefined) output.warn(`${kleur.yellow(modFileName)} has no Modrinth version ID associated. It will not be imported.`)
+      else {
+        const modrinthVersion = (await output.withLoading(modrinthApi.getVersion(modrinthVersionId), "Fetching version information"))!
+        const modrinthMod = (await output.withLoading(modrinthApi.getMod(modrinthVersion.projectId), "Fetching mod information"))!
+
+        await addModrinthMod(modrinthMod, modrinthVersion, content.side?.replace("both", "client-server"))
+      }
+
+      output.println(`${kleur.yellow(modFileName)} ${kleur.green("was imported.")} ${kleur.gray(`(${index}/${modFileNames.length})`)}`)
+      index++
+    }
+
+    output.println(`${kleur.yellow(modFileNames.length)} ${kleur.green("mods were imported.")}`)
   })
 
 packwizCommand.command("serve")
