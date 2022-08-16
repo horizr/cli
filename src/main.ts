@@ -6,19 +6,101 @@ import { modrinthCommand } from "./commands/modrinth.js"
 import { packwizCommand } from "./commands/packwiz.js"
 import dedent from "dedent"
 import { default as wrapAnsi } from "wrap-ansi"
-import { removeModFile } from "./files.js"
+import { CURRENT_HORIZR_FILE_FORMAT_VERSION, HorizrFile, removeModFile } from "./files.js"
 import { output } from "./output.js"
 import figures from "figures"
 import yesno from "yesno"
 import { releaseChannelOrder } from "./shared.js"
 import fs from "fs-extra"
 import { Path } from "./path.js"
+import enquirer from "enquirer"
+import { clearCache } from "./utils.js"
+import { fetchFabricMinecraftVersions, fetchFabricVersions } from "./fabricApi.js"
 
 const program = new Command("horizr")
   .version(
     (await fs.readJson(Path.create(import.meta.url.slice(5)).getParent().resolve("../package.json").toString())).version,
     "-v, --version"
   )
+  .option("--clear-cache", "Clear the HTTP cache before doing the operation.")
+  .on("option:clear-cache", () => {
+    clearCache()
+    output.println(kleur.green("Cache was cleared.\n"))
+  })
+
+program.command("init <path>")
+  .description("Initialize a new pack in the directory.")
+  .action(async path => {
+    const directoryPath = Path.create(path)
+    const horizrFilePath = directoryPath.resolve("horizr.json")
+
+    if (await fs.pathExists(horizrFilePath.toString())) output.failAndExit(`${kleur.yellow("horizr.json")} already exists in the directory.`)
+
+    await fs.mkdirp(directoryPath.toString())
+    const minecraftVersions = await output.withLoading(fetchFabricMinecraftVersions(), "Fetching Minecraft versions")
+
+    const answers: any = await enquirer.prompt([
+      {
+        name: "name",
+        type: "input",
+        message: "Name",
+        validate: answer => answer.length === 0 ? "An answer is required." : true
+      },
+      {
+        name: "authors",
+        type: "input",
+        message: "Authors (comma-separated)",
+        validate: answer => answer.length === 0 ? "An answer is required." : true
+      },
+      {
+        name: "description",
+        type: "text",
+        message: "Description"
+      },
+      {
+        name: "license",
+        type: "text",
+        message: "License (SPDX-ID)",
+        validate: answer => answer.length === 0 ? "An answer is required." : true
+      },
+      {
+        name: "minecraftVersion",
+        type: "autocomplete",
+        message: "Minecraft version",
+        choices: minecraftVersions.map(version => ({
+          name: version,
+          value: version
+        })),
+        // @ts-expect-error
+        limit: 10,
+        validate: answer => minecraftVersions.includes(answer) ? true : "Please select a version from the list."
+      }
+    ])
+
+    const fabricVersion = (await output.withLoading(fetchFabricVersions(answers.minecraftVersion), "Fetching latest Fabric version"))[0]
+
+    const file: HorizrFile = {
+      formatVersion: CURRENT_HORIZR_FILE_FORMAT_VERSION,
+      meta: {
+        name: answers.name,
+        version: "1.0.0",
+        description: answers.description === "" ? undefined : answers.description,
+        authors: (answers.authors as string).split(", ").map(a => a.trim()),
+        license: answers.license
+      },
+      versions: {
+        minecraft: answers.minecraftVersion,
+        fabric: fabricVersion
+      }
+    }
+
+    await fs.writeJson(horizrFilePath.toString(), file, { spaces: 2 })
+    await fs.writeFile(directoryPath.resolve(".gitignore").toString(), "/generated/")
+
+    const relativePath = Path.create(process.cwd()).relative(directoryPath).toString()
+    if (relativePath === "") output.println(kleur.green(`Successfully initialized pack.`))
+    else output.println(kleur.green(`Successfully initialized pack in ${kleur.yellow(relativePath)}.`))
+  })
 
 program.command("info", { isDefault: true })
   .description("Print information about the pack.")
@@ -35,7 +117,6 @@ program.command("info", { isDefault: true })
       License: ${kleur.yellow(pack.horizrFile.meta.license.toUpperCase())}
       Mods: ${kleur.yellow(pack.mods.length.toString())}${disabledModsCount === 0 ? "" : ` (${disabledModsCount} disabled)`}
 
-      Loader: ${kleur.yellow(`${pack.horizrFile.loader} v${pack.horizrFile.versions.loader}`)}
       Minecraft version: ${kleur.yellow(pack.horizrFile.versions.minecraft)}
     `)
   })

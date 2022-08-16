@@ -20,11 +20,6 @@ import { addModrinthMod, findModForModrinthMod, getModFileDataForModrinthVersion
 
 const modrinthCommand = new Command("modrinth")
   .alias("mr")
-  .option("--clear-cache", "Clear the cache before doing the operation.")
-  .on("option:clear-cache", () => {
-    modrinthApi.clearCache()
-    output.println(kleur.green("Cache was cleared.\n"))
-  })
 
 modrinthCommand.command("search <query...>")
   .description("Search for mods.")
@@ -33,7 +28,7 @@ modrinthCommand.command("search <query...>")
   .action(async (query, options) => {
     const pack = await usePack()
     const loader = output.startLoading(`Searching for ${kleur.yellow(query)}`)
-    const { results } = await modrinthApi.searchMods(pack.horizrFile.loader, pack.horizrFile.versions.minecraft, query, options)
+    const { results } = await modrinthApi.searchMods(pack.horizrFile.versions.minecraft, query, options)
     loader.stop()
 
     output.println(
@@ -87,18 +82,14 @@ modrinthModCommand.command("versions <id>")
     const loader = output.startLoading("Fetching mod information")
     const modrinthMod = await modrinthApi.getMod(id)
     if (modrinthMod === null) return loader.failAndExit("not found")
+    else loader.stop()
 
     const existingMod = await findModForModrinthMod(modrinthMod)
-
-    loader.setText("Fetching versions")
-    const modrinthVersions = await modrinthApi.listVersions(id, pack.horizrFile.loader, pack.horizrFile.versions.minecraft)
-    loader.stop()
+    const modrinthVersions = await output.withLoading(modrinthApi.listVersions(id, pack.horizrFile.versions.minecraft), "Fetching versions")
 
     if (modrinthVersions.length === 0) {
-      const message = dedent`
-          There are no versions compatible with the pack (Loader: ${kleur.yellow(pack.horizrFile.loader)}, \
-          Minecraft ${kleur.yellow(pack.horizrFile.versions.minecraft)}).
-        `
+      const message =
+        `There are no versions compatible with the pack (Fabric ${kleur.yellow(pack.horizrFile.versions.fabric)}, Minecraft ${kleur.yellow(pack.horizrFile.versions.minecraft)}).`
 
       output.println(kleur.red(message))
     } else {
@@ -138,11 +129,9 @@ modrinthModCommand.command("activate <id>")
     const loader = output.startLoading("Fetching mod information")
     const modrinthMod = await modrinthApi.getMod(id)
     if (modrinthMod === null) return loader.failAndExit("not found")
+    else loader.stop()
 
-    loader.setText("Fetching versions")
-    const modrinthVersions = await modrinthApi.listVersions(id, pack.horizrFile.loader, pack.horizrFile.versions.minecraft)
-    loader.stop()
-
+    const modrinthVersions = await output.withLoading(modrinthApi.listVersions(id, pack.horizrFile.versions.minecraft), "Fetching versions")
     if (modrinthVersions.length === 0) return output.failAndExit("There is no compatible version of this mod.")
 
     const sortedModrinthVersions = sortModrinthVersionsByPreference(modrinthVersions)
@@ -238,7 +227,7 @@ modrinthVersionCommand.command("info <id>")
       
       Version name: ${kleur.yellow(modrinthVersion.name)} ${kleur.gray(ago(modrinthVersion.publicationDate))}
       Minecraft versions: ${modrinthVersion.supportedMinecraftVersions.map(version => version === pack.horizrFile.versions.minecraft ? kleur.green(version) : kleur.red(version)).join(", ")}
-      Loaders: ${modrinthVersion.supportedLoaders.map(loader => loader === pack.horizrFile.loader ? kleur.green(loader) : kleur.red(loader)).join(", ")}
+      Loaders: ${modrinthVersion.supportedLoaders.map(loader => loader === "fabric" ? kleur.green(loader) : kleur.red(loader)).join(", ")}
       
       Related mods: ${relationsColorKey}
       ${relationsList}
@@ -298,7 +287,7 @@ modrinthCommand.command("export")
         summary: pack.horizrFile.meta.description,
         dependencies: {
           minecraft: pack.horizrFile.versions.minecraft,
-          [`${pack.horizrFile.loader}-loader`]: pack.horizrFile.versions.loader
+          "fabric-loader": pack.horizrFile.versions.fabric
         },
         files: pack.mods.map(mod => ({
           path: `mods/${mod.modFile.file.name}`,

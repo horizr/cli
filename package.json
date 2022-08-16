@@ -1,7 +1,7 @@
 {
   "name": "@horizr/cli",
   "version": "1.0.0",
-  "main": "./dist/main.ts",
+  "main": "./dist/main.js",
   "type": "module",
   "license": "MIT",
   "author": "Moritz Ruth <dev@moritzruth.de>",
@@ -22,6 +22,7 @@
     "address": "^1.2.0",
     "commander": "^9.4.0",
     "dedent": "^0.7.0",
+    "enquirer": "^2.3.6",
     "env-paths": "^3.0.0",
     "figures": "^5.0.0",
     "find-up": "^6.3.0",

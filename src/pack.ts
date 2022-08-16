@@ -75,10 +75,12 @@ export async function usePack(): Promise<Pack> {
             if (mod.modFile.source.type === "modrinth") {
               const activeVersionString = mod.modFile.file.version
               const activeSemver = semver.parse(activeVersionString)
-              if (activeSemver === null)
-                output.warn(`${kleur.yellow(mod.modFile.name)} has no valid semantic version: ${kleur.yellow(mod.modFile.file.version)}. The publication date will instead be used.`)
+              if (activeSemver === null) output.warn(
+                `${kleur.yellow(mod.modFile.name)} has no valid semantic version: ${kleur.yellow(mod.modFile.file.version)}. ` +
+                  `The publication date will instead be used.`
+              )
 
-              const versions = await modrinthApi.listVersions(mod.modFile.source.modId, pack.horizrFile.loader, pack.horizrFile.versions.minecraft)
+              const versions = await modrinthApi.listVersions(mod.modFile.source.modId, pack.horizrFile.versions.minecraft)
               const allowedVersions = versions.filter(version => allowedReleaseChannels.includes(version.releaseChannel))
 
               const newerVersions = activeSemver === null ? allowedVersions : allowedVersions.filter(version => {

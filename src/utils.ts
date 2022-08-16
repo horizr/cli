@@ -1,6 +1,6 @@
 import { InvalidArgumentError } from "commander"
 import hash, { HashaInput } from "hasha"
-import { Path } from "./path.js"
+import { Path, paths } from "./path.js"
 import { ZipFile } from "yazl"
 import { walk } from "@root/walk"
 import fs from "fs-extra"
@@ -9,6 +9,26 @@ import serveHandler from "serve-handler"
 import * as http from "http"
 import addressWithCallback from "address"
 import { promisify } from "util"
+import { KeyvFile } from "keyv-file"
+import originalGot from "got"
+
+const keyvCache = new KeyvFile({
+  filename: paths.cache.resolve("http.json").toString(),
+  writeDelay: 50,
+  expiredCheckDelay: 24 * 3600 * 1000,
+  encode: JSON.stringify,
+  decode: JSON.parse
+})
+
+export const clearCache = () => keyvCache.clear()
+
+export const got = originalGot.extend({
+  cache: keyvCache,
+  responseType: "json",
+  headers: {
+    "User-Agent": "moritzruth/horizr/1.0.0 (not yet public)"
+  }
+})
 
 const address = promisify(addressWithCallback)
 export const getLANAddress = () => address().then(r => r.ip)

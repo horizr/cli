@@ -29,7 +29,7 @@ export async function findModForModrinthMod(modrinthMod: ModrinthMod): Promise<(
 }
 
 export const isModrinthVersionCompatible = (modrinthVersion: ModrinthVersion, pack: Pack) =>
-  modrinthVersion.supportedMinecraftVersions.includes(pack.horizrFile.versions.minecraft) && modrinthVersion.supportedLoaders.includes(pack.horizrFile.loader)
+  modrinthVersion.supportedMinecraftVersions.includes(pack.horizrFile.versions.minecraft) && modrinthVersion.supportedLoaders.includes("fabric")
 
 export function getModFileDataForModrinthVersion(modrinthMod: ModrinthMod, modrinthModVersion: ModrinthVersion): ModFileData {
   const modrinthVersionFile = findCorrectModVersionFile(modrinthModVersion.files)

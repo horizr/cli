@@ -1,15 +1,16 @@
 # Horizr CLI
-> A CLI tool for creating Minecraft modpacks, primarily using the Fabric and Quilt loaders. 
+> A CLI tool for creating Minecraft modpacks using the Fabric loader.
 
 🎉 Features:
-- Search for mods on [Modrinth](https://modrinth.com/)
-- Add mods from Modrinth
-- View available (compatible) versions of mods from Modrinth
-- View dependencies of specific mod versions
+- Access [Modrinth](https://modrinth.com/)
+  - Search
+  - Add
+  - View available versions
+  - View dependencies
 - Check for updates and view changelogs before applying them
+- Export the pack to the [Modrinth format (`.mrpack`)](https://docs.modrinth.com/docs/modpacks/format_definition/)
 - Export the pack to the [`packwiz`](https://packwiz.infra.link/) format
 - HTTP-serve the `packwiz` export for usage with [`packwiz-installer`](https://packwiz.infra.link/tutorials/installing/packwiz-installer/)
-- Export the pack to the [Modrinth format (`.mrpack`)](https://docs.modrinth.com/docs/modpacks/format_definition/)
 
 ## Usage
 
@@ -23,6 +24,8 @@ $ npm i -g @horizr/cli
 ```
 
 Run any command with the `-h` flag to see the available options.
+
+A new pack can be initiated using `horizr init <path>`.
 
 ## Examples
 

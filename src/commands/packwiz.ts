@@ -50,9 +50,6 @@ packwizCommand.command("export")
 async function runExport(forServer: boolean) {
   const pack = await usePack()
 
-  if (pack.horizrFile.loader !== "fabric")
-    output.println(kleur.yellow(`packwiz does not yet support the ${kleur.reset(pack.horizrFile.loader)} loader. No loader will be specified.`))
-
   const loader = output.startLoading("Generating")
 
   const outputDirectoryPath = pack.paths.generated.resolve("packwiz")
@@ -172,8 +169,8 @@ async function writeIndexAndPackManifest(indexedFiles: IndexedFile[], outputDire
     pack-format = "packwiz:1.0.0"
   
     [versions]
-    minecraft = "${pack.horizrFile.versions.minecraft}"\
-    ${pack.horizrFile.loader === "fabric" ? "\n" + `fabric = ${JSON.stringify(pack.horizrFile.versions.loader)}` : ""}
+    minecraft = ${JSON.stringify(pack.horizrFile.versions.minecraft)}
+    fabric = ${JSON.stringify(pack.horizrFile.versions.fabric)}
   
     [index]
     file = "index.toml"

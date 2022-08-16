@@ -59,19 +59,19 @@ const horizrFileSchema = z.object({
     description: z.string().optional(),
     license: z.string()
   }),
-  loader: z.enum(["fabric", "quilt"]),
   versions: z.object({
     minecraft: z.string(),
-    loader: z.string()
+    fabric: z.string()
   })
 })
 
 export type HorizrFile = z.output<typeof horizrFileSchema>
+export const CURRENT_HORIZR_FILE_FORMAT_VERSION = 1
 
 export async function readHorizrFile(packPath: Path) {
   const data = await readJsonFileInPack(packPath, Path.create("horizr.json"), horizrFileSchema)
   if (data === null) return output.failAndExit(`${kleur.yellow("horizr.json")} does not exist.`)
-  if (data.formatVersion !== 1) return output.failAndExit(`${kleur.yellow("horizr.json")} has unsupported format version: ${kleur.yellow(data.formatVersion)}`)
+  if (data.formatVersion !== CURRENT_HORIZR_FILE_FORMAT_VERSION) return output.failAndExit(`${kleur.yellow("horizr.json")} has unsupported format version: ${kleur.yellow(data.formatVersion)}`)
 
   return data
 }

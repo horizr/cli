@@ -1,19 +1,9 @@
-import got, { HTTPError, Response } from "got"
+import { HTTPError, Response } from "got"
 import kleur from "kleur"
-import { KeyvFile } from "keyv-file"
-import { delay } from "../utils.js"
+import { delay, got } from "../utils.js"
 import { output } from "../output.js"
-import { paths } from "../path.js"
 import { dependencyToRelatedVersionType } from "./utils.js"
-import { ModLoader, ReleaseChannel } from "../shared.js"
-
-const keyvCache = new KeyvFile({
-  filename: paths.cache.resolve("http.json").toString(),
-  writeDelay: 50,
-  expiredCheckDelay: 24 * 3600 * 1000,
-  encode: JSON.stringify,
-  decode: JSON.parse
-})
+import { ReleaseChannel } from "../shared.js"
 
 async function getModrinthApiOptional(url: string): Promise<any | null> {
   let response: Response
@@ -21,11 +11,6 @@ async function getModrinthApiOptional(url: string): Promise<any | null> {
   while (true) {
     response = await got(url, {
       prefixUrl: "https://api.modrinth.com",
-      headers: {
-        "User-Agent": "moritzruth/horizr/1.0.0 (not yet public)"
-      },
-      cache: keyvCache,
-      responseType: "json",
       throwHttpErrors: false,
       retry: {
         limit: 3,
@@ -159,14 +144,12 @@ export interface ModrinthVersionFile {
 }
 
 export const modrinthApi = {
-  clearCache: () => keyvCache.clear(),
   async searchMods(
-    loader: ModLoader,
     minecraftVersion: string,
     query: string,
     pagination: PaginationOptions
   ): Promise<{ total: number; results: ModrinthMod[] }> {
-    const facets = `[["categories:${loader}"],["versions:${minecraftVersion}"],["project_type:mod"]]`
+    const facets = `[["categories:fabric"],["versions:${minecraftVersion}"],["project_type:mod"]]`
 
     const response = await getModrinthApi(`v2/search?query=${encodeURIComponent(query)}&limit=${pagination.limit}&offset=${pagination.skip}&facets=${facets}`)
 
@@ -205,8 +188,8 @@ export const modrinthApi = {
       updateDate: new Date(response.updated)
     }
   },
-  async listVersions(idOrSlug: string, loader: ModLoader, minecraftVersion: string): Promise<ModrinthVersion[]> {
-    const response = await getModrinthApi(`v2/project/${idOrSlug}/version?loaders=["${loader}"]&game_versions=["${minecraftVersion}"]`)
+  async listVersions(idOrSlug: string, minecraftVersion: string): Promise<ModrinthVersion[]> {
+    const response = await getModrinthApi(`v2/project/${idOrSlug}/version?loaders=["fabric"]&game_versions=["${minecraftVersion}"]`)
 
     return response.map(transformApiModVersion)
   },
