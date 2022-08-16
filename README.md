@@ -1,5 +1,7 @@
-# Horizr CLI
-> A CLI tool for creating Minecraft modpacks using the Fabric loader.
+# horizr CLI
+![npm](https://img.shields.io/npm/v/@horizr/cli?color=white&label=latest%20version&logoColor=red&style=flat-square)
+
+> A CLI tool for creating and maintaining Minecraft modpacks using the Fabric loader.
 
 🎉 Features:
 - Access [Modrinth](https://modrinth.com/)
