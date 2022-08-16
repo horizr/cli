@@ -6,7 +6,7 @@
 🎉 Features:
 - Access [Modrinth](https://modrinth.com/)
   - Search
-  - Add
+  - Add mods by ID or slug
   - View available versions
   - View dependencies
 - Check for updates and view changelogs before applying them
@@ -27,7 +27,7 @@ $ npm i -g @horizr/cli
 
 Run any command with the `-h` flag to see the available options.
 
-A new pack can be initiated using `horizr init <path>`.
+A new pack can be initialized using `horizr init <path>`.
 
 ## Examples
 
