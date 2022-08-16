@@ -5,6 +5,37 @@ import { ZipFile } from "yazl"
 import { walk } from "@root/walk"
 import fs from "fs-extra"
 import { pEvent } from "p-event"
+import serveHandler from "serve-handler"
+import * as http from "http"
+import addressWithCallback from "address"
+import { promisify } from "util"
+
+const address = promisify(addressWithCallback)
+
+export const getLANAddress = () => address().then(r => r.ip)
+
+export function httpServeDirectory(path: Path, port: number, expose: boolean, onListen: () => void) {
+  const server = http.createServer((request, response) => {
+    return serveHandler(request, response, {
+      directoryListing: false,
+      public: path.toString(),
+      cleanUrls: false,
+      headers: [
+        {
+          source: "**/*.toml",
+          headers: [{
+            key: "Content-Type",
+            value: "application/toml"
+          }]
+        }
+      ]
+    })
+  })
+
+  server.listen(port, expose ? "0.0.0.0" : "127.0.0.1", () => {
+    onListen()
+  })
+}
 
 export async function zipDirectory(directoryPath: Path, outputFilePath: Path) {
   const zipFile = new ZipFile()

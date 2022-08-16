@@ -3,7 +3,7 @@ import { usePack } from "../pack.js"
 import fs from "fs-extra"
 import dedent from "dedent"
 import kleur from "kleur"
-import { getSha512HexHash } from "../utils.js"
+import { getLANAddress, getSha512HexHash, httpServeDirectory, optionParsePositiveInteger } from "../utils.js"
 import { output } from "../output.js"
 import { Visitor, walk } from "@root/walk"
 import { Path } from "../path.js"
@@ -25,9 +25,28 @@ packwizCommand.command("import")
 
 packwizCommand.command("serve")
   .description("Start an HTTP server in the packwiz directory.")
-  .action(async () => {
-    output.failAndExit("Not implemented.")
-    // TODO: serve
+  .option("-p, --port <port>", "The port of the HTTP server.", optionParsePositiveInteger, 8000)
+  .option("-e, --expose", "Expose the HTTP server on all interfaces.")
+  .action(async options => {
+    const pack = await usePack()
+    const directoryPath = pack.paths.generated.resolve("packwiz")
+    if (!(await fs.pathExists(directoryPath.toString())))
+      output.failAndExit(`The ${kleur.yellow("packwiz")} directory does not exist. Generate it by running ${kleur.yellow("horizr packwiz export")}.`)
+
+    const lanAddress = await getLANAddress()
+
+    httpServeDirectory(directoryPath, options.port, options.expose, () => {
+      const localAddress = `http://localhost:${options.port}/pack.toml`
+
+      if (options.expose) {
+        output.println(dedent`
+          ${kleur.green("Serving at")}
+            Local: ${kleur.yellow(localAddress)}
+            Network: ${kleur.yellow(`http://${lanAddress}:${options.port}/pack.toml`)}
+        `)
+      }
+      else output.println(`${kleur.green("Serving at")} ${kleur.yellow(localAddress)}`)
+    })
   })
 
 packwizCommand.command("dev")
@@ -62,7 +81,7 @@ packwizCommand.command("export")
         name = ${JSON.stringify(mod.modFile.name)}
         filename = ${JSON.stringify(mod.modFile.file.name)}
         side = "${mod.modFile.side.replace("client+server", "both")}"
-        
+
         [download]
         hash-format = "sha512"
         hash = ${JSON.stringify(mod.modFile.file.hashes.sha512)}
@@ -92,8 +111,6 @@ packwizCommand.command("export")
         if (dirent.isFile()) {
           const outputPath = outputDirectoryPath.resolve(relativePath)
           await fs.mkdirp(outputPath.getParent().toString())
-          console.log(path)
-          console.log(outputPath.toString())
           await fs.copy(path, outputPath.toString())
 
           indexedFiles.push({
@@ -115,7 +132,7 @@ packwizCommand.command("export")
 
     const index = dedent`
       hash-format = "sha512"
-      
+
       ${indexedFiles.map(file => dedent`
         [[files]]
         file = ${JSON.stringify(file.path)}
