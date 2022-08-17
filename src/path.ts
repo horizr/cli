@@ -34,6 +34,12 @@ export class Path {
     return pathModule.isAbsolute(this.value)
   }
 
+  // Not tested
+  // isDescendantOf(other: Path) {
+  //   if (!(this.isAbsolute() && other.isAbsolute())) throw new Error("Both paths must be absolute")
+  //   return pathModule.relative(this.value, other.value).split("/").includes("..")
+  // }
+
   toString() {
     return this.value
   }

@@ -17,6 +17,7 @@ import semver from "semver"
 import { output } from "../output.js"
 import fs from "fs-extra"
 import { addModrinthMod, findModForModrinthMod, getModFileDataForModrinthVersion, isModrinthVersionCompatible, sortModrinthVersionsByPreference } from "../modrinth/utils.js"
+import { walk } from "@root/walk"
 
 const modrinthCommand = new Command("modrinth")
   .alias("mr")
@@ -311,10 +312,23 @@ modrinthCommand.command("export")
         "Copying client-server overrides"
       )
 
-      if (await fs.pathExists(pack.paths.overrides["client"].toString())) await output.withLoading(
-        fs.copy(pack.paths.overrides["client"].toString(), outputDirectory.resolve("client-overrides").toString(), { recursive: true }),
-        "Copying client overrides"
-      )
+      if (await fs.pathExists(pack.paths.overrides["client"].toString())) {
+        await output.withLoading(
+          fs.copy(pack.paths.overrides["client"].toString(), outputDirectory.resolve("client-overrides").toString(), { recursive: true }),
+          "Copying client overrides"
+        )
+
+        // Workaround for https://github.com/PolyMC/PolyMC/issues/1060
+        await walk(pack.paths.overrides["client"].toString(), async (error, path, dirent) => {
+          if (error) return
+          if (dirent.isDirectory()) {
+            const relativePath = pack.paths.overrides["client"].relative(path)
+            await fs.mkdirp(outputDirectory.resolve("overrides", relativePath).toString())
+          }
+
+          return true
+        })
+      }
 
       if (await fs.pathExists(pack.paths.overrides["server"].toString())) await output.withLoading(
         fs.copy(pack.paths.overrides["server"].toString(), outputDirectory.resolve("server-overrides").toString(), { recursive: true }),
