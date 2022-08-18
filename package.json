@@ -24,6 +24,7 @@
     "dedent": "^0.7.0",
     "enquirer": "^2.3.6",
     "env-paths": "^3.0.0",
+    "fast-glob": "^3.2.11",
     "figures": "^5.0.0",
     "find-up": "^6.3.0",
     "fs-extra": "^10.1.0",

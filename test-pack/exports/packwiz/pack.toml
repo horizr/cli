@@ -1,0 +1,13 @@
+name = "Test"
+author = "John Doe"
+description = "A test pack for testing the horizr CLI. It is not intended for playing."
+pack-format = "packwiz:1.1.0"
+
+[versions]
+minecraft = "1.18.2"
+fabric = "0.14.7"
+
+[index]
+file = "index.toml"
+hash-format = "sha512"
+hash = "8173efc3a86743de3b35e88cb01fbe10f12b13ce4c99fd730abaeb81ee88d736078cc2dfcf45a12b36ded174c73ac59304f6074b2ec916babc5c941adc170299"

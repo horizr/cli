@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "version": {
+    "name": "mc1.18.2-0.7.10",
+    "size": 466196,
+    "fileName": "lithium-fabric-mc1.18.2-0.7.10.jar",
+    "downloadUrl": "https://cdn.modrinth.com/data/gvQqBUqZ/versions/mc1.18.2-0.7.10/lithium-fabric-mc1.18.2-0.7.10.jar",
+    "hashes": {
+      "sha1": "d5c19c3d4edb4228652adcc8abb94f9bd80a634c",
+      "sha512": "05f0e51191c9051224c791d63ad4b7915e6f3c442e5d38225e7b05ea4261ee459edb3d8ce99411e1a5a854547549845f21cc8ee2f0079281fec999c1d319fb07"
+    }
+  },
+  "source": {
+    "type": "modrinth",
+    "modId": "gvQqBUqZ",
+    "versionId": "pHl1Vi6k",
+    "ignoreUpdates": false
+  }
+}

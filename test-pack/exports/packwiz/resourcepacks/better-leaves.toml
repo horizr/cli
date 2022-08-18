@@ -1,0 +1,8 @@
+name = "better-leaves.hm.json"
+filename = "Better-Leaves.zip"
+side = "client"
+
+[download]
+hash-format = "sha512"
+hash = "7a1a5f925251db5cd19e3ce44f5acdf3941221b20e40c253b8c451adaa406c4d4d66dd424244802e34029f4a14ed2594f4e1c550c7c48dc365c8d9ebfc0cd817"
+url = "https://mediafiles.forgecdn.net/files/3814/725/Better-Leaves-7.0-1.13%2B.zip"

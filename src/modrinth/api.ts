@@ -1,16 +1,20 @@
 import { HTTPError, Response } from "got"
+import { output } from "../utils/output.js"
 import kleur from "kleur"
-import { delay, got } from "../utils.js"
-import { output } from "../output.js"
-import { dependencyToRelatedVersionType } from "./utils.js"
-import { ReleaseChannel } from "../shared.js"
+import { got } from "../utils/http.js"
+import { delay } from "../utils/promises.js"
+import { dependencyToRelatedVersionType } from "./index.js"
+import { ReleaseChannel } from "../pack.js"
+import { orEmptyString } from "../utils/strings.js"
+
+const BASE_URL = "https://api.modrinth.com"
 
 async function getModrinthApiOptional(url: string): Promise<any | null> {
   let response: Response
 
   while (true) {
     response = await got(url, {
-      prefixUrl: "https://api.modrinth.com",
+      prefixUrl: BASE_URL,
       throwHttpErrors: false,
       retry: {
         limit: 3,
@@ -56,7 +60,7 @@ async function getModrinthApiOptional(url: string): Promise<any | null> {
 
 async function getModrinthApi(url: string): Promise<any> {
   const response = await getModrinthApiOptional(url)
-  if (response === null) return output.failAndExit("Request failed with status code 404.")
+  if (response === null) return output.failAndExit(`Request failed with status code 404: ${kleur.yellow(BASE_URL + "/" + url)}`)
   return response
 }
 
@@ -188,8 +192,8 @@ export const modrinthApi = {
       updateDate: new Date(response.updated)
     }
   },
-  async listVersions(idOrSlug: string, minecraftVersion: string): Promise<ModrinthVersion[]> {
-    const response = await getModrinthApi(`v2/project/${idOrSlug}/version?loaders=["fabric"]&game_versions=["${minecraftVersion}"]`)
+  async listVersions(idOrSlug: string, minecraftVersion?: string): Promise<ModrinthVersion[]> {
+    const response = await getModrinthApi(`v2/project/${idOrSlug}/version?loaders=["fabric"]${orEmptyString(minecraftVersion, v => `&game_versions=["${v}"]`)}`)
 
     return response.map(transformApiModVersion)
   },

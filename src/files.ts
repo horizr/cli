@@ -1,57 +1,54 @@
-import { SafeParseError, z, ZodRawShape } from "zod"
-import kleur from "kleur"
-import fs from "fs-extra"
-import * as process from "process"
-import { dirname } from "path"
+import { AbsolutePath, envPaths, RelativePath } from "./utils/path.js"
+import process from "process"
 import { findUp } from "find-up"
-import { output } from "./output.js"
-import { Path } from "./path.js"
-import { Dirent } from "fs"
-import { sides } from "./shared.js"
+import { output } from "./utils/output.js"
+import kleur from "kleur"
+import { SafeParseError, z, ZodRawShape } from "zod"
+import fs from "fs-extra"
+import { dirname } from "path"
+import fastGlob from "fast-glob"
+import { sides } from "./pack.js"
 
-export async function findPackDirectoryPath(): Promise<Path> {
+export async function findPackDirectoryPath(): Promise<AbsolutePath> {
   if (process.argv0.endsWith("/node")) { // run using pnpm
-    return Path.createAbsolute("./test-pack")
+    return envPaths.cwd.resolve("./test-pack")
   } else {
-    const parent = await findUp("horizr.json")
-    if (parent === undefined) return output.failAndExit(`${kleur.yellow("horizr.json")} could not be found in the current working directory or any parent.`)
+    const parent = await findUp(PACK_MANIFEST_FILE_NAME)
+    if (parent === undefined) return output.failAndExit(`${kleur.yellow(PACK_MANIFEST_FILE_NAME)} could not be found in the current working directory or any parent.`)
 
-    return Path.createAbsolute(dirname(parent))
+    return AbsolutePath.create(dirname(parent))
   }
 }
 
-export async function readJsonFileInPack<S extends z.ZodObject<ZodRawShape>>(
-  packPath: Path,
-  filePath: Path,
-  schema: S
-): Promise<z.output<S> | null> {
+export async function writeJsonFile<S extends z.ZodObject<ZodRawShape>>(path: AbsolutePath, schema: S, data: z.input<S>) {
+  await fs.mkdirp(path.parent().toString())
+  await fs.writeJson(path.toString(), schema.parse(data), { spaces: 2 })
+}
+
+export async function readJsonFile<S extends z.ZodObject<ZodRawShape>>(rootPath: AbsolutePath, specificPath: RelativePath, schema: S): Promise<z.output<S> | null> {
   let data
 
   try {
-    data = await fs.readJson(packPath.resolve(filePath).toString())
+    data = await fs.readJson(rootPath.resolve(specificPath).toString())
   } catch (e: unknown) {
-    if (e instanceof SyntaxError) return output.failAndExit(`${kleur.yellow(filePath.toString())} does not contain valid JSON.`)
+    if (e instanceof SyntaxError) return output.failAndExit(`${kleur.yellow(specificPath.toString())} does not contain valid JSON.`)
     else return null
   }
 
   const result = await schema.safeParseAsync(data)
   if (!result.success) {
     const error = (result as SafeParseError<unknown>).error
-    return output.failAndExit(`${kleur.yellow(filePath.toString())} is invalid:\n${error.issues.map(issue => `- ${kleur.yellow(issue.path.join("/"))} — ${kleur.red(issue.message)}`).join("\n")}`)
+    return output.failAndExit(`${kleur.yellow(specificPath.toString())} is invalid:\n${error.issues.map(issue => `- ${kleur.yellow(issue.path.join("/"))} — ${kleur.red(issue.message)}`).join("\n")}`)
   }
 
   return result.data
 }
 
-export async function writeJsonFileInPack<S extends z.ZodObject<ZodRawShape>>(packPath: Path, filePath: Path, schema: S, data: z.input<S>) {
-  const absolutePath = packPath.resolve(filePath)
-  await fs.mkdirp(absolutePath.getParent().toString())
+export const PACK_MANIFEST_FORMAT_VERSION = 1
+export const PACK_MANIFEST_FILE_NAME = "horizr.json"
 
-  await fs.writeJson(absolutePath.toString(), schema.parse(data), { spaces: 2 })
-}
-
-const horizrFileSchema = z.object({
-  formatVersion: z.string().or(z.number()),
+export const horizrFileSchema = z.object({
+  formatVersion: z.literal(PACK_MANIFEST_FORMAT_VERSION),
   meta: z.object({
     name: z.string(),
     version: z.string(),
@@ -65,75 +62,48 @@ const horizrFileSchema = z.object({
   })
 })
 
-export type HorizrFile = z.output<typeof horizrFileSchema>
-export const CURRENT_HORIZR_FILE_FORMAT_VERSION = 1
+export type PackManifest = z.output<typeof horizrFileSchema>
 
-export async function readHorizrFile(packPath: Path) {
-  const data = await readJsonFileInPack(packPath, Path.create("horizr.json"), horizrFileSchema)
-  if (data === null) return output.failAndExit(`${kleur.yellow("horizr.json")} does not exist.`)
-  if (data.formatVersion !== CURRENT_HORIZR_FILE_FORMAT_VERSION) return output.failAndExit(`${kleur.yellow("horizr.json")} has unsupported format version: ${kleur.yellow(data.formatVersion)}`)
+export const META_FILE_EXTENSION = "hm.json"
 
-  return data
-}
-
-const modFileModrinthSourceSchema = z.object({
+const metaFileModrinthSourceSchema = z.object({
   type: z.literal("modrinth"),
   modId: z.string(),
   versionId: z.string()
 })
 
-export type ModFileModrinthSource = z.output<typeof modFileModrinthSourceSchema>
+export type MetaFileModrinthSource = z.output<typeof metaFileModrinthSourceSchema>
 
-const modFileDataSchema = z.object({
-  version: z.string(),
+const metaFileContentVersionSchema = z.object({
   name: z.string(),
   size: z.number().int().min(0).optional(),
+  fileName: z.string(),
   downloadUrl: z.string().url(),
-  hashes: z.object({ // Adopted from Modrinth
+  hashes: z.object({
     sha1: z.string(),
     sha512: z.string()
   })
 })
 
-export type ModFileData = z.output<typeof modFileDataSchema>
+export type MetaFileContentVersion = z.output<typeof metaFileContentVersionSchema>
 
-const modFileSchema = z.object({
-  name: z.string(),
+export const metaFileContentSchema = z.object({
+  displayName: z.string().optional(),
   enabled: z.boolean().default(true),
-  ignoreUpdates: z.boolean().default(false),
-  side: z.enum(sides),
   comment: z.string().optional(),
-  file: modFileDataSchema,
+  version: metaFileContentVersionSchema,
   source: z.discriminatedUnion("type", [
-    modFileModrinthSourceSchema,
+    metaFileModrinthSourceSchema,
     z.object({ type: z.literal("raw") })
-  ])
+  ]).and(z.object({
+    ignoreUpdates: z.boolean().default(false)
+  })).optional()
 })
 
-export type ModFile = z.output<typeof modFileSchema>
+export type MetaFileContent = z.output<typeof metaFileContentSchema>
 
-export async function readModFile(packPath: Path, modId: string): Promise<ModFile | null> {
-  return await readJsonFileInPack(packPath, Path.create("mods", `${modId}.json`), modFileSchema)
-}
-
-export async function writeModFile(packPath: Path, modId: string, data: z.input<typeof modFileSchema>): Promise<void> {
-  await writeJsonFileInPack(packPath, Path.create("mods", `${modId}.json`), modFileSchema, data)
-}
-
-export async function removeModFile(packPath: Path, modId: string): Promise<void> {
-  await fs.remove(packPath.resolve("mods", `${modId}.json`).toString())
-}
-
-export async function readModIds(packPath: Path) {
-  const modsPath = packPath.resolve("mods")
-  await fs.mkdirp(modsPath.toString())
-  const files = await fs.readdir(modsPath.toString(), { withFileTypes: true })
-
-  return files.filter(file => file.isFile() && file.name.endsWith(".json")).map(file => file.name.slice(0, -5))
-}
-
-export async function getOverrideDirents(overridesDirectoryPath: Path): Promise<Dirent[]> {
-  if (!await fs.pathExists(overridesDirectoryPath.toString())) return []
-
-  return await fs.readdir(overridesDirectoryPath.toString(), { withFileTypes: true })
-}
+export const listSourceFiles = (sourceDirectoryPath: AbsolutePath) => fastGlob(sides.map(side => `${side}/**/*`), {
+  cwd: sourceDirectoryPath.toString(),
+  followSymbolicLinks: false,
+  onlyFiles: true
+}).then(paths => paths.map(path => RelativePath.create(path)))

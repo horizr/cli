@@ -1,4 +1,4 @@
-import { got } from "./utils.js"
+import { got } from "./utils/http.js"
 
 export async function fetchFabricMinecraftVersions(): Promise<string[]> {
   const versions = await got("https://meta.fabricmc.net/v1/versions/game").json<any[]>()

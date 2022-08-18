@@ -1,0 +1,31 @@
+hash-format = "sha512"
+
+[[files]]
+file = "mods/sodium.hm.json"
+hash = "955b4e74bc9b1988cdbcfa659fb977997ebf99dbd701e4b2aa6175cacd4a763b39399ea5e16db5536cb59708e0f9ce84746c1611519c0689d640da6752b496e3"
+metafile = true
+
+[[files]]
+file = "resourcepacks/better-leaves.hm.json"
+hash = "81fc1a6887ad61e4ed5662d7173efd743280bd2ad640fdebd495b30ee915bdbe9b2882b55ca7dabac155ba1e4520ad3957f76cc1ac98dce0ef7087d3c07beed9"
+metafile = true
+
+[[files]]
+file = "mods/charm.hm.json"
+hash = "c388539aa188902f671e27de1bf8306ded8ed1ba7dc5cb3a9fd3b6f13895a789255d36c025b1ef2172c6123d99e28201660c83657d7d36a318c4387249c69931"
+metafile = true
+
+[[files]]
+file = "mods/fabric-api.hm.json"
+hash = "c9ca7daa8ed64738ddd1fa4d334e14e768623322e25f6f8eb38ac616bbef1b3823e55136b22ff7f1e88adec98b44b2ebdb6981ccff0c7e6f1acd4ca91f82c594"
+metafile = true
+
+[[files]]
+file = "options.txt"
+hash = "41ab8c11939b9379f97739cd998a44dae98f92fd3715253d14d979987a22e8ca7c5799396efc3951e16597346c590ae0bbbbf31dba9d7004c4459a3930322f20"
+metafile = false
+
+[[files]]
+file = "config/charm.ini"
+hash = "21ed919c05480f55d202dc97c33ae55d897acec162ac75d5f62d914ce5a18fbaac83dc631d4690896e3b6135da1305d0f3f73e1df3b54fbc777b186367ba421d"
+metafile = false

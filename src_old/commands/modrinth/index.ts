@@ -1,8 +1,8 @@
 import { Command } from "commander"
 import { take } from "lodash-es"
-import { usePack } from "../pack.js"
+import { usePack } from "../../pack.js"
 import kleur from "kleur"
-import { optionParsePositiveInteger, truncateWithEllipsis, zipDirectory } from "../utils.js"
+import { optionParsePositiveInteger, truncateWithEllipsis, zipDirectory } from "../../utils.js"
 import { default as wrapAnsi } from "wrap-ansi"
 import figures from "figures"
 import {
@@ -10,13 +10,13 @@ import {
   ModrinthMod,
   ModrinthVersion,
   ModrinthVersionRelation,
-} from "../modrinth/api.js"
+} from "../../modrinth/api.js"
 import dedent from "dedent"
 import ago from "s-ago"
 import semver from "semver"
-import { output } from "../output.js"
+import { output } from "../../../src/utils/output.js"
 import fs from "fs-extra"
-import { addModrinthMod, findModForModrinthMod, getModFileDataForModrinthVersion, isModrinthVersionCompatible, sortModrinthVersionsByPreference } from "../modrinth/utils.js"
+import { addModrinthMod, findModForModrinthMod, getModFileDataForModrinthVersion, isModrinthVersionCompatible, sortModrinthVersionsByPreference } from "../../modrinth/utils.js"
 import { walk } from "@root/walk"
 
 const modrinthCommand = new Command("modrinth")

@@ -1,12 +1,9 @@
 {
-  "name": "Sodium",
   "enabled": true,
-  "ignoreUpdates": false,
-  "side": "client",
-  "file": {
-    "version": "mc1.18.2-0.4.1",
-    "name": "sodium-fabric-mc1.18.2-0.4.1+build.15.jar",
+  "version": {
+    "name": "mc1.18.2-0.4.1",
     "size": 1318645,
+    "fileName": "sodium-fabric-mc1.18.2-0.4.1+build.15.jar",
     "downloadUrl": "https://cdn.modrinth.com/data/AANobbMI/versions/mc1.18.2-0.4.1/sodium-fabric-mc1.18.2-0.4.1%2Bbuild.15.jar",
     "hashes": {
       "sha1": "f839863a6be7014b8d80058ea1f361521148d049",
@@ -16,6 +13,7 @@
   "source": {
     "type": "modrinth",
     "modId": "AANobbMI",
-    "versionId": "74Y5Z8fo"
+    "versionId": "74Y5Z8fo",
+    "ignoreUpdates": false
   }
 }
