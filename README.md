@@ -1,4 +1,4 @@
-![horizr](https://github.com/horizr/art/raw/main/horizr-banner.jpg)
+![horizr](./banner.png)
 
 # horizr CLI
 ![npm](https://img.shields.io/npm/v/@horizr/cli?color=white&label=latest%20version&logoColor=red&style=flat-square)
@@ -38,3 +38,4 @@ Features I have in mind:
 - List disabled source files
 - Allow disabling static source files by adding `.disabled` to their name
 - Import packwiz packs
+- Hot-reloading `packwiz dev` command
