@@ -15,7 +15,7 @@
 ## Usage
 
 Because both [pkg](https://github.com/vercel/pkg) and [nexe](https://github.com/nexe/nexe) don’t support ES modules at the time of writing,
-I can‘t publish executable files.
+I can’t publish executable files.
 
 The only way of installing is therefore `npm`.
 
