@@ -44,11 +44,11 @@ export async function readJsonFile<S extends z.ZodObject<ZodRawShape>>(rootPath:
   return result.data
 }
 
-export const PACK_MANIFEST_FORMAT_VERSION = 1
+export const FORMAT_VERSION = 1
 export const PACK_MANIFEST_FILE_NAME = "horizr.json"
 
-export const horizrFileSchema = z.object({
-  formatVersion: z.literal(PACK_MANIFEST_FORMAT_VERSION),
+export const packManifestFileSchema = z.object({
+  formatVersion: z.literal(FORMAT_VERSION),
   slug: z.string(),
   meta: z.object({
     name: z.string(),
@@ -63,7 +63,7 @@ export const horizrFileSchema = z.object({
   })
 })
 
-export type PackManifest = z.output<typeof horizrFileSchema>
+export type PackManifest = z.output<typeof packManifestFileSchema>
 
 export const META_FILE_EXTENSION = "hm.json"
 
@@ -89,6 +89,7 @@ const metaFileContentVersionSchema = z.object({
 export type MetaFileContentVersion = z.output<typeof metaFileContentVersionSchema>
 
 export const metaFileContentSchema = z.object({
+  formatVersion: z.literal(FORMAT_VERSION),
   displayName: z.string().optional(),
   enabled: z.boolean().default(true),
   comment: z.string().optional(),

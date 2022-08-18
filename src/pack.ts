@@ -2,7 +2,7 @@ import { AbsolutePath, envPaths, RelativePath } from "./utils/path.js"
 import {
   findPackDirectoryPath,
   PackManifest,
-  horizrFileSchema,
+  packManifestFileSchema,
   MetaFileContent,
   PACK_MANIFEST_FILE_NAME,
   metaFileContentSchema,
@@ -82,7 +82,7 @@ export async function usePack(): Promise<Pack> {
     const sourceDirectoryPath = rootDirectoryPath.resolve("src")
     const readSourceJsonFile: Pack["readSourceJsonFile"] = async (path, schema) => readJsonFile(sourceDirectoryPath, path, schema)
 
-    const manifest = (await readJsonFile(rootDirectoryPath, RelativePath.create(PACK_MANIFEST_FILE_NAME), horizrFileSchema))!
+    const manifest = (await readJsonFile(rootDirectoryPath, RelativePath.create(PACK_MANIFEST_FILE_NAME), packManifestFileSchema))!
 
     const metaFiles: MetaFile[] = []
     const staticSourceFiles: StaticSourceFile[] = []

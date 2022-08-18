@@ -12,7 +12,7 @@ import { output } from "../../utils/output.js"
 import { modrinthApi } from "../../modrinth/api.js"
 import { Side, usePack } from "../../pack.js"
 import kleur from "kleur"
-import { META_FILE_EXTENSION, metaFileContentSchema, writeJsonFile } from "../../files.js"
+import { FORMAT_VERSION, META_FILE_EXTENSION, metaFileContentSchema, writeJsonFile } from "../../files.js"
 import fs from "fs-extra"
 import enquirer from "enquirer"
 import { orEmptyString } from "../../utils/strings.js"
@@ -67,6 +67,7 @@ export const activateCommand = new Command("activate")
 
     await fs.mkdirp(absolutePath.parent().toString())
     await writeJsonFile(absolutePath, metaFileContentSchema, {
+      formatVersion: FORMAT_VERSION,
       enabled: true,
       version: getMetaFileContentVersionForModrinth(modrinthVersion),
       source: {

@@ -5,7 +5,7 @@ import { output } from "../utils/output.js"
 import kleur from "kleur"
 import { fetchFabricMinecraftVersions, fetchFabricVersions } from "../fabricApi.js"
 import enquirer from "enquirer"
-import { PACK_MANIFEST_FILE_NAME, PACK_MANIFEST_FORMAT_VERSION, PackManifest } from "../files.js"
+import { PACK_MANIFEST_FILE_NAME, FORMAT_VERSION, PackManifest } from "../files.js"
 import pathModule from "path"
 import { EXPORTS_DIRECTORY_NAME } from "../pack.js"
 import slugify from "@sindresorhus/slugify"
@@ -63,7 +63,7 @@ export const initCommand = new Command("init")
     const fabricVersion = (await output.withLoading(fetchFabricVersions(answers.minecraftVersion), "Fetching latest Fabric version"))[0]
 
     const file: PackManifest = {
-      formatVersion: PACK_MANIFEST_FORMAT_VERSION,
+      formatVersion: FORMAT_VERSION,
       slug: slugify(answers.name),
       meta: {
         name: answers.name,

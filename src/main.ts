@@ -10,6 +10,7 @@ import { infoCommand } from "./commands/info.js"
 import { updateCommand } from "./commands/update.js"
 import { packwizCommand } from "./commands/packwiz/index.js"
 import { modrinthCommand } from "./commands/modrinth/index.js"
+import { exportJsonSchemasCommand } from "./commands/exportJsonSchemas.js"
 
 const program = new Command("horizr")
   .version(
@@ -23,6 +24,7 @@ const program = new Command("horizr")
   })
   .addCommand(modrinthCommand)
   .addCommand(packwizCommand)
+  .addCommand(exportJsonSchemasCommand, { hidden: true })
   .addCommand(infoCommand)
   .addCommand(initCommand)
   .addCommand(updateCommand)
