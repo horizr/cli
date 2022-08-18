@@ -73,6 +73,8 @@ export interface Update {
   apply(): Promise<void>
 }
 
+export const EXPORTS_DIRECTORY_NAME = "exports"
+
 let pack: Pack
 export async function usePack(): Promise<Pack> {
   if (pack === undefined) {
@@ -97,7 +99,7 @@ export async function usePack(): Promise<Pack> {
         side: pathSegments[0] as Side,
         relativePath: relativePath,
         absolutePath: sourceDirectoryPath.resolve(relativePath),
-        effectivePath: RelativePath._createDirect(pathSegments.slice(1).join("/")),
+        effectivePath: RelativePath._createDirect(pathSegments.slice(1).join("/"))
       }
 
       if (relativePath.toString().endsWith("." + META_FILE_EXTENSION)) {
@@ -107,6 +109,7 @@ export async function usePack(): Promise<Pack> {
         const metaFile: MetaFile = {
           ...sourceFile,
           isStatic: false,
+          effectivePath: sourceFile.effectivePath.parent().joinedWith(content.version.fileName),
           content,
           fetchUpdates: source?.type === "modrinth"
             ? allowedReleaseChannels => fetchModrinthModUpdates(metaFile, source, allowedReleaseChannels, manifest.versions.minecraft)
@@ -134,7 +137,7 @@ export async function usePack(): Promise<Pack> {
       paths: {
         root: rootDirectoryPath,
         source: sourceDirectoryPath,
-        exports: rootDirectoryPath.resolve("exports")
+        exports: rootDirectoryPath.resolve(EXPORTS_DIRECTORY_NAME)
       },
       manifest,
       metaFiles,

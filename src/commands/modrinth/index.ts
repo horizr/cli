@@ -3,10 +3,12 @@ import { activateCommand } from "./activate.js"
 import dedent from "dedent"
 import kleur from "kleur"
 import { openCommand } from "./open.js"
+import { exportCommand } from "./export.js"
 
 export const modrinthCommand = new Command("modrinth")
   .alias("mr")
   .addCommand(activateCommand)
+  .addCommand(exportCommand)
   .addCommand(openCommand)
   .addHelpText("afterAll", dedent`
     \n${kleur.yellow("<code>")} may be one of the following:

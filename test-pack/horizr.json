@@ -1,5 +1,6 @@
 {
   "formatVersion": 1,
+  "slug": "test",
   "meta": {
     "name": "Test",
     "version": "1.0.0",

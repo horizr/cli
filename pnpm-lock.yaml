@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@root/walk': ^1.1.0
+  '@sindresorhus/slugify': ^2.1.0
   '@types/dedent': ^0.7.0
   '@types/fs-extra': ^9.0.13
   '@types/lodash-es': ^4.17.6
@@ -44,6 +45,7 @@ specifiers:
 
 dependencies:
   '@root/walk': 1.1.0
+  '@sindresorhus/slugify': 2.1.0
   address: 1.2.0
   commander: 9.4.0
   dedent: 0.7.0
@@ -164,6 +166,22 @@ packages:
   /@sindresorhus/is/5.3.0:
     resolution: {integrity: sha512-CX6t4SYQ37lzxicAqsBtxA3OseeoVrh9cSJ5PFYam0GksYlupRfy1A+Q4aYD3zvcfECLc0zO2u+ZnR2UYKvCrw==}
     engines: {node: '>=14.16'}
+    dev: false
+
+  /@sindresorhus/slugify/2.1.0:
+    resolution: {integrity: sha512-gU3Gdm/V167BmUwIn8APHZ3SeeRVRUSOdXxnt7Q/JkUHLXaaTA/prYmoRumwsSitJZWUDYMzDWdWgrOdvE8IRQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@sindresorhus/transliterate': 1.5.0
+      escape-string-regexp: 5.0.0
+    dev: false
+
+  /@sindresorhus/transliterate/1.5.0:
+    resolution: {integrity: sha512-/sfSkoNelLq5riqNRp5uBjHIKBi1MWZk9ubRT1WiBQuTfmDf7BeQkph2DJzRB83QagMPHk2VDjuvpy0VuwyzdA==}
+    engines: {node: '>=12'}
+    dependencies:
+      escape-string-regexp: 5.0.0
+      lodash.deburr: 4.1.0
     dev: false
 
   /@szmarczak/http-timer/5.0.1:
@@ -1160,6 +1178,10 @@ packages:
 
   /lodash-es/4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: false
+
+  /lodash.deburr/4.1.0:
+    resolution: {integrity: sha512-m/M1U1f3ddMCs6Hq2tAsYThTBDaAKFDX3dwDo97GEYzamXi9SqUpjWi/Rrj/gf3X2n8ktwgZrlP1z6E3v/IExQ==}
     dev: false
 
   /log-symbols/5.1.0:

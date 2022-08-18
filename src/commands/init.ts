@@ -7,6 +7,8 @@ import { fetchFabricMinecraftVersions, fetchFabricVersions } from "../fabricApi.
 import enquirer from "enquirer"
 import { PACK_MANIFEST_FILE_NAME, PACK_MANIFEST_FORMAT_VERSION, PackManifest } from "../files.js"
 import pathModule from "path"
+import { EXPORTS_DIRECTORY_NAME } from "../pack.js"
+import slugify from "@sindresorhus/slugify"
 
 export const initCommand = new Command("init")
   .argument("<path>")
@@ -62,6 +64,7 @@ export const initCommand = new Command("init")
 
     const file: PackManifest = {
       formatVersion: PACK_MANIFEST_FORMAT_VERSION,
+      slug: slugify(answers.name),
       meta: {
         name: answers.name,
         version: "1.0.0",
@@ -76,7 +79,7 @@ export const initCommand = new Command("init")
     }
 
     await fs.writeJson(manifestFilePath.toString(), file, { spaces: 2 })
-    await fs.writeFile(path.resolve(".gitignore").toString(), "/generated/")
+    await fs.writeFile(path.resolve(".gitignore").toString(), `/${EXPORTS_DIRECTORY_NAME}/`)
 
     output.println(kleur.green(`Successfully initialized pack in ${kleur.yellow(pathModule.normalize(pathString))}`))
   })

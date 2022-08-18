@@ -49,6 +49,7 @@ export const PACK_MANIFEST_FILE_NAME = "horizr.json"
 
 export const horizrFileSchema = z.object({
   formatVersion: z.literal(PACK_MANIFEST_FORMAT_VERSION),
+  slug: z.string(),
   meta: z.object({
     name: z.string(),
     version: z.string(),
