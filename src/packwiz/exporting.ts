@@ -53,17 +53,17 @@ export async function writeAndIndexMetaFile(indexedFiles: IndexedFile[], outputD
     url = ${JSON.stringify(metaFile.content.version.downloadUrl)}${updateSection}
   `
 
-  const effectiveOutputPath = metaFile.effectivePath
+  const relativeOutputPath = metaFile.effectivePath
     .parent()
-    .joinedWith(metaFile.effectivePath.getBasename().slice(0, -1 * META_FILE_EXTENSION.length) + "toml")
+    .joinedWith(metaFile.absolutePath.getBasename(META_FILE_EXTENSION) + ".toml")
 
-  const outputPath = outputDirectoryPath.resolve(effectiveOutputPath)
+  const outputPath = outputDirectoryPath.resolve(relativeOutputPath)
 
   await fs.mkdirp(outputPath.parent().toString())
   await fs.writeFile(outputPath.toString(), content)
 
   indexedFiles.push({
-    path: metaFile.effectivePath,
+    path: relativeOutputPath,
     isMeta: true,
     sha512HashHex: await computeSha512HexHash(content)
   })

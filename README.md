@@ -33,3 +33,8 @@ I developed this tool primarily for my own packs, that’s why its missing some 
 
 Nevertheless, if you want a feature added, feel free to [create an issue](https://github.com/horizr/cli/issues/new).
 A pull request would be even better.
+
+Features I have in mind:
+- List disabled source files
+- Allow disabling static source files by adding `.disabled` to their name
+- Import packwiz packs

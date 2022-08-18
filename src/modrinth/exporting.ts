@@ -3,6 +3,7 @@ import { output } from "../utils/output.js"
 import fs from "fs-extra"
 import { Side, usePack } from "../pack.js"
 import kleur from "kleur"
+import { mapNotNull } from "../utils/collections.js"
 
 const overridesDirectoryNameBySide: Record<Side, string> = {
   client: "client-overrides",
@@ -25,7 +26,7 @@ export async function generateOutputDirectory(outputDirectoryPath: AbsolutePath)
       minecraft: pack.manifest.versions.minecraft,
       "fabric-loader": pack.manifest.versions.fabric
     },
-    files: pack.metaFiles.map(metaFile => ({
+    files: mapNotNull(pack.metaFiles, metaFile => metaFile.content.enabled ? ({
       path: metaFile.effectivePath.toString(),
       hashes: {
         sha1: metaFile.content.version.hashes.sha1,
@@ -39,7 +40,7 @@ export async function generateOutputDirectory(outputDirectoryPath: AbsolutePath)
         metaFile.content.version.downloadUrl
       ],
       fileSize: metaFile.content.version.size
-    }))
+    }) : null)
   }, { spaces: 2 })
 
   let i = 0

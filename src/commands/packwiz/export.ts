@@ -21,8 +21,12 @@ export const exportCommand = new Command("export")
     let i = 0
     for (const metaFile of pack.metaFiles) {
       i++
-      loader.setText(`Exporting ${kleur.yellow(metaFile.getDisplayString())} (${i}/${pack.metaFiles.length})`)
-      await writeAndIndexMetaFile(indexedFiles, outputDirectoryPath, metaFile)
+      if (!metaFile.content.enabled) continue
+
+      await output.withLoading(
+        writeAndIndexMetaFile(indexedFiles, outputDirectoryPath, metaFile),
+        `Exporting ${kleur.yellow(metaFile.getDisplayString())} (${i}/${pack.metaFiles.length})`
+      )
     }
 
     i = 0
@@ -30,8 +34,10 @@ export const exportCommand = new Command("export")
       i++
       if (staticSourceFile.side !== "universal" && staticSourceFile.side !== side) continue
 
-      loader.setText(`Exporting ${kleur.yellow(staticSourceFile.relativePath.toString())} (${i}/${pack.metaFiles.length})`)
-      await writeAndIndexStaticSourceFile(indexedFiles, outputDirectoryPath, staticSourceFile)
+      await output.withLoading(
+        writeAndIndexStaticSourceFile(indexedFiles, outputDirectoryPath, staticSourceFile),
+        `Exporting ${kleur.yellow(staticSourceFile.relativePath.toString())} (${i}/${pack.metaFiles.length})`
+      )
     }
 
     loader.setText(`Creating ${kleur.yellow("index.toml")} and ${kleur.yellow("pack.toml")}`)

@@ -1,4 +1,5 @@
 {
+  "formatVersion": 1,
   "enabled": true,
   "version": {
     "name": "mc1.18.2-0.4.1",

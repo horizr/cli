@@ -94,8 +94,8 @@ export class AbsolutePath implements AbstractPath {
     return this.pathString === (typeof other === "string" ? pathModule.normalize(other) : other.toString())
   }
 
-  getBasename(): string {
-    return pathModule.basename(this.pathString)
+  getBasename(stripExtension?: string): string {
+    return pathModule.basename(this.pathString, "." + stripExtension)
   }
 
   /**

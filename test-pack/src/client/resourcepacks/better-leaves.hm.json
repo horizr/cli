@@ -1,5 +1,6 @@
 {
-  "name": "Better Leaves",
+  "formatVersion": 1,
+  "displayName": "Better Leaves",
   "enabled": true,
   "side": "client-server",
   "version": {
