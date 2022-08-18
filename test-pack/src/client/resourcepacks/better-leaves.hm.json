@@ -2,7 +2,6 @@
   "formatVersion": 1,
   "displayName": "Better Leaves",
   "enabled": true,
-  "side": "client-server",
   "version": {
     "name": "7.0.0",
     "fileName": "Better-Leaves.zip",
