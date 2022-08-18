@@ -140,14 +140,13 @@ export const output = {
     }
   },
   println(text: string) {
-    this.print(text + "\n")
+    this.print(text + "\n\n")
   },
   printlnWrapping(text: string) {
     this.println(wrapAnsi(text, process.stdout.columns))
   },
   warn(text: string) {
     this.printlnWrapping(`${kleur.yellow(figures.pointer)} ${text}`)
-    this.println("")
   },
   fail(text: string) {
     last(loadersStack)?.fail()

@@ -6,11 +6,7 @@
 > A CLI tool for creating and maintaining Minecraft modpacks using the Fabric loader.
 
 🎉 Features:
-- Access [Modrinth](https://modrinth.com/)
-  - Search
-  - Add mods by ID or slug
-  - View available versions
-  - View dependencies
+- Add mods from [Modrinth](https://modrinth.com/)
 - Check for updates and view changelogs before applying them
 - Export the pack to the [Modrinth format (`.mrpack`)](https://docs.modrinth.com/docs/modpacks/format_definition/)
 - Export the pack to the [`packwiz`](https://packwiz.infra.link/) format
@@ -31,76 +27,9 @@ Run any command with the `-h` flag to see the available options.
 
 A new pack can be initialized using `horizr init <path>`.
 
-## Examples
-
-- Activate the latest (compatible) version of [Charm](https://modrinth.com/mod/charm)
-```sh
-$ horizr modrinth mod activate charm
-
-# or short:
-$ horizr mr mod a charm
-```
-
-- Activate `v4.1.1` of [Charm](https://modrinth.com/mod/charm)
-```sh
-$ horizr modrinth mod versions charm
-
-# `BT9G1Jjs` is the version code you are looking for.
-# This output will be colored in your console.
-BT9G1Jjs 4.2.0+1.18.2 (↓ 137)
-featured
-
-Name: [1.18.2] 4.2.0
-Channel: release
-Minecraft versions: 1.18.2
-
-Publication: last week
-
-https://modrinth.com/mod/pOQTcQmj/version/BT9G1Jjs
-
-# … more versions omitted for brevity
-
-$ horizr modrinth version activate BT9G1Jjs
-
-Charm (4.2.0+1.18.2) was successfully activated.
-
-
-Dependencies
-◉ Fabric API (P7dR8mSH): any version
-
-```
-
-- Check for updates
-```sh
-$ horizr update
-# Because Sodium's version string is not a valid SemVer,
-# the publication date will instead be used for comparison.
-❯ Sodium has no valid semantic version: mc1.18.2-0.4.1. The
-publication date will instead be used.
-
-Available updates
-- charm Charm: 4.1.0+1.18.2 → 4.2.0+1.18.2
-```
-
-- Apply an update
-```sh
-$ horizr update charm
-
-Changelog for 4.2.0+1.18.2
-
-* Added ebony wood.
-* Fixed issue with Totems not always spawning or being
-carried away by mobs.
-# … omitted for brevity
-
-Apply the update? [Y/n] y
-
-Successfully updated Charm to 4.2.0+1.18.2.
-```
-
 ## Contributing
 
-I developed this tool primarily for my own packs, soooo… the code quality is not bad, but it’s not good either.
+I developed this tool primarily for my own packs, that’s why its missing some features I didn’t absolutely need.
 
-If you want a feature added, feel free to [create an issue](https://github.com/horizr/cli/issues/new).
+Nevertheless, if you want a feature added, feel free to [create an issue](https://github.com/horizr/cli/issues/new).
 A pull request would be even better.

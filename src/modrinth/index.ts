@@ -1,5 +1,5 @@
 import { IterableElement } from "type-fest"
-import { modrinthApi, ModrinthMod, ModrinthVersion, ModrinthVersionFile } from "./api.js"
+import { modrinthApi, ModrinthMod, ModrinthVersion, ModrinthVersionFile, ModrinthVersionRelation } from "./api.js"
 import { sortBy } from "lodash-es"
 import { MetaFile, Pack, releaseChannelOrder } from "../pack.js"
 import { MetaFileContentVersion } from "../files.js"
@@ -106,5 +106,23 @@ export async function resolveModrinthCode(code: string): Promise<{ modrinthMod: 
   return output.failAndExit(`Invalid ${kleur.yellow("<code>")}: ${kleur.yellow(code)}`)
 }
 
-export const findMetaFileForModrinthMod = (metaFiles: MetaFile[], modrinthMod: ModrinthMod) =>
-  metaFiles.find(metaFile => metaFile.content.source?.type === "modrinth" && metaFile.content.source.modId === modrinthMod.id) ?? null
+export const findMetaFileForModrinthMod = (metaFiles: MetaFile[], modrinthModId: string) =>
+  metaFiles.find(metaFile => metaFile.content.source?.type === "modrinth" && metaFile.content.source.modId === modrinthModId) ?? null
+
+export async function resolveFullRelation(relation: ModrinthVersionRelation) {
+  if (relation.projectId === null) {
+    const modrinthVersion = (await modrinthApi.getVersion(relation.versionId!))!
+
+    return {
+      modrinthVersion,
+      modrinthMod: (await modrinthApi.getMod(modrinthVersion.projectId))!
+    }
+  } else {
+    const modrinthMod = (await modrinthApi.getMod(relation.projectId))!
+
+    return {
+      modrinthMod,
+      modrinthVersion: null
+    }
+  }
+}

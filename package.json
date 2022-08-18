@@ -8,7 +8,8 @@
   "repository": "https://github.com/horizr/cli",
   "scripts": {
     "start": "tsx src/main.ts",
-    "build": "del dist && tsc"
+    "build": "del dist && tsc",
+    "check": "tsc --noEmit"
   },
   "bin": {
     "horizr": "bin/horizr.js"
@@ -35,6 +36,7 @@
     "lodash-es": "^4.17.21",
     "loud-rejection": "^2.2.0",
     "nanoid": "^4.0.0",
+    "open": "^8.4.0",
     "ora": "^6.1.2",
     "p-event": "^5.0.1",
     "p-limit": "^4.0.0",

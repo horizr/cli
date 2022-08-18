@@ -4,7 +4,7 @@ import {
   findMetaFileForModrinthMod,
   getMetaFileContentVersionForModrinth,
   getSideOfModrinthMod,
-  isModrinthVersionCompatible,
+  isModrinthVersionCompatible, resolveFullRelation,
   resolveModrinthCode,
   sortModrinthVersionsByPreference
 } from "../../modrinth/index.js"
@@ -15,6 +15,7 @@ import kleur from "kleur"
 import { META_FILE_EXTENSION, metaFileContentSchema, writeJsonFile } from "../../files.js"
 import fs from "fs-extra"
 import enquirer from "enquirer"
+import { orEmptyString } from "../../utils/strings.js"
 
 export const activateCommand = new Command("activate")
   .argument("<code>")
@@ -27,7 +28,7 @@ export const activateCommand = new Command("activate")
     const modrinthMod = resolvedCode.modrinthMod
     let modrinthVersion = resolvedCode.modrinthVersion
 
-    const existingMetaFile = findMetaFileForModrinthMod(pack.metaFiles, modrinthMod)
+    const existingMetaFile = findMetaFileForModrinthMod(pack.metaFiles, modrinthMod.id)
     if (existingMetaFile !== null) {
       output.println(`The mod is already active: ${kleur.yellow(existingMetaFile.relativePath.toString())} ${kleur.blue(existingMetaFile.content.version.name)}`)
 
@@ -77,6 +78,22 @@ export const activateCommand = new Command("activate")
     })
 
     await pack.registerCreatedSourceFile(relativePath)
-
     output.println(kleur.green(`Successfully wrote ${kleur.yellow(relativePath.toString())}`))
+
+    const loader = output.startLoading("Checking dependencies")
+
+    for (const relation of modrinthVersion.relations) {
+      if (relation.type === "hard_dependency") {
+        const { modrinthMod, modrinthVersion } = await resolveFullRelation(relation)
+
+        const metaFile = await findMetaFileForModrinthMod(pack.metaFiles, modrinthMod.id)
+        if (metaFile === null) {
+          const versionString = orEmptyString(modrinthVersion, v => ` ${kleur.blue(v.versionString)}`)
+          const idString = kleur.gray(modrinthMod.slug + orEmptyString(modrinthVersion, v => `@${v.versionString}`))
+          output.warn(`Unmet dependency: ${kleur.yellow(modrinthMod.title)}${versionString} ${idString}`)
+        }
+      }
+    }
+
+    loader.stop()
   })
