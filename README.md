@@ -28,7 +28,6 @@ Run any command with the `-h` flag to see the available options.
 A new pack can be initialized using `horizr init <path>`.
 
 ## Contributing
-
 I developed this tool primarily for my own packs, that’s why its missing some features I didn’t absolutely need.
 
 Nevertheless, if you want a feature added, feel free to [create an issue](https://github.com/horizr/cli/issues/new).
