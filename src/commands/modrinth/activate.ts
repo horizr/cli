@@ -67,6 +67,7 @@ export const activateCommand = new Command("activate")
 
     await fs.mkdirp(absolutePath.parent().toString())
     await writeJsonFile(absolutePath, metaFileContentSchema, {
+      displayName: modrinthMod.title,
       formatVersion: FORMAT_VERSION,
       enabled: true,
       version: getMetaFileContentVersionForModrinth(modrinthVersion),
