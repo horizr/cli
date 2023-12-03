@@ -8,9 +8,9 @@ import { IndexedFile, PACKWIZ_EXPORT_DIRECTORY_NAME, writeAndIndexMetaFile, writ
 export const exportCommand = new Command("export")
   .description("Export a packwiz pack.")
   .option("-s, --server", "Use server overrides instead of client overrides. Only applies to static files.")
-  .action(async (path, options) => {
+  .action(async (path, command) => {
     const pack = await usePack()
-    const side: Side = options.server ? "server" : "client"
+    const side: Side = command.opts().server ? "server" : "client"
     const loader = output.startLoading("Exporting")
 
     const outputDirectoryPath = pack.paths.exports.resolve(PACKWIZ_EXPORT_DIRECTORY_NAME)
